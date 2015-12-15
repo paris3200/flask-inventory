@@ -18,7 +18,17 @@
           <li><a href="{{ url_for('main.about') }}">About</a></li>
           {% if current_user.is_authenticated() %}
            <li><a href="{{ url_for('user.members') }}">Members</a></li>
-           <li><a href="{{ url_for('vendor.view') }}">Vendors</a></li>
+           <li>
+               <a href="{{ url_for('vendor.view') }}" 
+                  class="dropdown-toggle" data-toggle="dropdown" 
+                  role="button">Vendors<span class="caret"></span>
+               </a>
+               <ul class="dropdown-menu">
+                   <li><a href="{{ url_for('vendor.view') }}">View</a></li>
+                   <li><a href="{{ url_for('vendor.register') }}">Add</a></li>
+               </ul>
+
+           </li>
           {% endif %}
         </ul>
         <ul class="nav navbar-nav navbar-right">

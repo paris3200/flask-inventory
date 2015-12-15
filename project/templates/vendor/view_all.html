@@ -17,11 +17,16 @@
         <th>City</th>
         <th>State</th>
         <th>Zipcode</th>
+        <th>Actions</th>
     </tr>
     {% for entry in entries %}
     <tr>
         <td>{{ entry.id }}</td>
-        <td><a href='{{ entry.website|safe }}'>{{ entry.name|safe }}<a/></td>
+        <td>{% if entry.website: %}
+                <a href="{{ entry.website|safe }}" target="blank">{{ entry.name|safe }}<a/></td>
+            {% else %}
+                {{ entry.name|safe }}
+            {% endif %}
         <td>{{ entry.contact|safe }}</td>
         <td>{{ entry.phone|safe }}</td>
         <td>
@@ -31,6 +36,7 @@
         <td>{{ entry.city|safe }}</td>
         <td>{{ entry.state|safe }}</td>
         <td>{{ entry.zipcode|safe }}</td>
+        <td><a href="/vendor/edit/{{ entry.id }}">Edit</a></td>
     </tr>
     {% else %}
     <p><em>Unbelievable.  No entries here so far</p>
