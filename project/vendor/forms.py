@@ -2,7 +2,7 @@
 
 
 from flask_wtf import Form
-from wtforms import TextField, SelectField
+from wtforms import TextField, SelectField, IntegerField
 from wtforms.validators import DataRequired
 
 STATE_ABBREV = ('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
@@ -25,6 +25,7 @@ class RegisterForm(Form):
     phone = TextField('Phone')
     website = TextField('Website')
 
+
 class EditForm(Form):
     name = TextField('Company', validators=[DataRequired()])
     contact = TextField('Contact')
@@ -37,3 +38,10 @@ class EditForm(Form):
     zipcode = TextField('Zipcode')
     phone = TextField('Phone')
     website = TextField('Website')
+
+
+class PurchaseOrderForm(Form):
+    vendor = TextField('Vendor Id', validators=[DataRequired()])
+    item = IntegerField('Item Id', validators=[DataRequired()])
+    quantity = IntegerField('Quantity', validators=[DataRequired()])
+    unit_price = TextField('Unit Price', validators=[DataRequired()])

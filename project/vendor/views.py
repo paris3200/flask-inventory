@@ -9,8 +9,8 @@ from flask import render_template, Blueprint, url_for, \
 from flask.ext.login import login_required
 
 from project import db
-from project.models import Vendor
-from project.vendor.forms import RegisterForm
+from project.models import Vendor, PurchaseOrder, LineItem, Component
+from project.vendor.forms import RegisterForm, PurchaseOrderForm
 
 ################
 #### config ####
@@ -69,9 +69,39 @@ def view():
     return render_template('/vendor/view_all.html', entries=vendors)
 
 
+@vendor_blueprint.route('/purchase_order/create/<int:vendor_id>',
+                        methods=['GET', 'POST'])
+@login_required
+def purchase_order(vendor_id):
+    vendor = Vendor.query.get_or_404(vendor_id)
+    form = PurchaseOrderForm()
+    if form.validate_on_submit():
+        with db.session.no_autoflush:
+            order = PurchaseOrder()
+            order.vendor = vendor
+            db.session.add(order)
+            component = Component.query.get(int(form.item.data))
+            line1 = LineItem(component=component,
+                             quantity=form.quantity.data,
+                             unit_price=form.unit_price.data)
+            order.line_items.append(line1)
+        db.session.commit()
+
+        flash('Vendor Updated', 'success')
+        return redirect(url_for('vendor.view_purchase_order'))
+    return render_template('vendor/purchase_order.html', form=form)
+
+@vendor_blueprint.route('/purchase_order/view/<int:po_id>',
+                        methods=['GET', 'POST'])
+@login_required
+def view_purchase_order(po_id):
+    po = PurchaseOrder.query.get_or_404(po_id)
+    return render_template('/vendor/view_po.html', entries=po)
+
 @vendor_blueprint.route('/vendor/search', methods=['GET'])
 @login_required
 def search():
+    """ Doesn't work. """
     form_name = request.args.get('name')
     vendors = Vendor.query.filter(Vendor.name.like(form_name)).all()
     result = []

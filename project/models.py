@@ -66,11 +66,13 @@ class PurchaseOrder(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     vendor_id = db.Column(db.Integer, db.ForeignKey('vendors.id'),
                           nullable=False)
-    created_on = db.Column(db.DateTime, nullable=False)
+    #created_on = db.Column(db.DateTime, nullable=False)
 
     vendor = db.relationship('Vendor', backref="purchase_orders",
-                             lazy="dynamic", uselist=True)
+                             lazy="joined")
 
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 class LineItem(db.Model):
     __tablename__ = "line_items"
@@ -78,12 +80,18 @@ class LineItem(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     quantity = db.Column(db.Integer, nullable=False)
     unit_price = db.Column(db.Numeric(12, 2), nullable=False)
-    purchase_order = db.Column(db.Integer,
+
+    purchase_order_id = db.Column(db.Integer,
                                db.ForeignKey('purchase_orders.id'),
                                nullable=False)
-    component = db.Column(db.Integer,
+
+    component_id = db.Column(db.Integer,
                           db.ForeignKey('components.id'),
                           nullable=False)
+
+    purchase_order = db.relationship("PurchaseOrder", backref='line_items',
+                                     lazy="joined")
+    component = db.relationship("Component", uselist=False)
 
     @hybrid_property
     def total_price(self):
