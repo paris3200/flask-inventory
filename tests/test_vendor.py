@@ -50,6 +50,17 @@ class TestVendorBlueprint(BaseTestCase):
         self.assertIn(b'<h1>Edit Vendor</h1>\n', response.data)
         self.assertIn(b'value="Achme"', response.data)
 
+
+    def test_edit_route_fails_with_invalid_vendor(self):
+        with self.client:
+            self.client.post(
+                '/login',
+                data=dict(email="ad@min.com", password="admin_user"),
+                follow_redirects=True)
+            response = self.client.get('/vendor/edit/1000',
+                                    follow_redirects=True)
+        self.assertEqual(response.status_code, 404)
+
     def test_edit_updates_to_database(self):
         with self.client:
             self.client.post(

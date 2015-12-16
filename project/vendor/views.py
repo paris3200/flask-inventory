@@ -5,7 +5,7 @@
 #################
 
 from flask import render_template, Blueprint, url_for, \
-    redirect, flash, request
+    redirect, flash, request, jsonify
 from flask.ext.login import login_required
 
 from project import db
@@ -68,3 +68,13 @@ def view():
     vendors = Vendor.query.all()
     return render_template('/vendor/view_all.html', entries=vendors)
 
+
+@vendor_blueprint.route('/vendor/search', methods=['GET'])
+@login_required
+def search():
+    form_name = request.args.get('name')
+    vendors = Vendor.query.filter(Vendor.name.like(form_name)).all()
+    result = []
+    for v in vendors:
+        result.append(v.as_dict()['name'])
+    return jsonify(name=result)
