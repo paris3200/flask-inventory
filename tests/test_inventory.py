@@ -6,10 +6,10 @@ import unittest
 
 from base import BaseTestCase
 from project.models import Vendor
-from project.vendor.forms import RegisterForm
+from project.inventory.forms import RegisterForm, PurchaseOrderForm
 
 
-class TestVendorBlueprint(BaseTestCase):
+class TestInventoryBlueprint(BaseTestCase):
 
     def test_register_route(self):
         # Ensure register behaves correctly when logged in.
@@ -123,8 +123,7 @@ class TestVendorBlueprint(BaseTestCase):
         self.assertIn(b'Vendor already exist\n', response.data)
         self.assertEqual(response.status_code, 200)
 
-    def test_validate_success_registration_form(self):
-        # Ensure invalid email format throws error.
+    def test_validate_registration_form(self):
         form  = RegisterForm(name="Achme",
                         contact="", phone="",
                         website="www.achme.com",
@@ -132,6 +131,23 @@ class TestVendorBlueprint(BaseTestCase):
                         city="", state="NC",
                         zipcode="")
         self.assertTrue(form.validate())
+
+    def test_view_purchase_order_404_with_unknown_id(self):
+        with self.client:
+            self.client.post(
+                '/login',
+                data=dict(email="ad@min.com", password="admin_user"),
+                follow_redirects=True)
+            response = self.client.get('/inventory/view_po/1001', follow_redirects=True)
+        self.assertEqual(response.status_code, 404)
+
+    def test_validate_purchase_order_form(self):
+        form = PurchaseOrderForm(item="1", quantity="10", unit_price="2.99")
+        self.assertTrue(form.validate())
+
+    def test_invalid_purchase_order_form(self):
+        form = PurchaseOrderForm(quantity="10", unit_price="2.99")
+        self.assertFalse(form.validate())
 
 if __name__ == '__main__':
     unittest.main()

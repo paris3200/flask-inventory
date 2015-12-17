@@ -68,7 +68,7 @@ def drop_db():
 @manager.command
 def create_admin():
     """Creates the admin user."""
-    db.session.add(User(email='jason@parisleatherworks.com', password='admin', admin=True))
+    db.session.add(User(email='ad@min.com', password='admin_user', admin=True))
     db.session.commit()
 
 

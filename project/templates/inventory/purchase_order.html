@@ -5,6 +5,7 @@
 
   <header class="content-header">
     <h1>Purchase Order</h1>
+    <h4>{{ vendor.name }}</h4>
   </header>
 
   <br>
@@ -17,14 +18,15 @@
     {{ wtf.form_errors(form, hiddens="only") }}
 
 
-    <div class="col-lg-4 col-sm-4">
+    <div class="form-inline">
 
-      {{ wtf.form_field(form.vendor) }}
       {{ wtf.form_field(form.item) }}
       {{ wtf.form_field(form.quantity) }}
       {{ wtf.form_field(form.unit_price) }}
 
-      <button class="btn btn-success" type="submit">Register Vendor</button>
+    </div>
+    <div>
+        <br><button class="btn btn-success" type="submit">Submit</button>
     </div>
 
   </form>

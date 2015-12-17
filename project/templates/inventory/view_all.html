@@ -21,7 +21,7 @@
     </tr>
     {% for entry in entries %}
     <tr>
-        <td>{{ entry.id }}</td>
+        <td><a href="{{ url_for('inventory.view_vendor', vendor_id=entry.id) }}">{{ entry.id }}</a>
         <td>{% if entry.website: %}
                 <a href="{{ entry.website|safe }}" target="blank">{{ entry.name|safe }}<a/></td>
             {% else %}
@@ -36,7 +36,10 @@
         <td>{{ entry.city|safe }}</td>
         <td>{{ entry.state|safe }}</td>
         <td>{{ entry.zipcode|safe }}</td>
-        <td><a href="/vendor/edit/{{ entry.id }}">Edit</a></td>
+        <td>
+            <a href="/purchase_order/create/{{ entry.id }}">Create PO</a> | 
+            <a href="/vendor/edit/{{ entry.id }}">Edit</a>
+        </td>
     </tr>
   </table>
     {% else %}

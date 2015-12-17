@@ -41,7 +41,6 @@ class EditForm(Form):
 
 
 class PurchaseOrderForm(Form):
-    vendor = TextField('Vendor Id', validators=[DataRequired()])
     item = IntegerField('Item Id', validators=[DataRequired()])
     quantity = IntegerField('Quantity', validators=[DataRequired()])
     unit_price = TextField('Unit Price', validators=[DataRequired()])

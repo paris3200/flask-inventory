@@ -64,9 +64,9 @@ class PurchaseOrder(db.Model):
     __tablename__ = "purchase_orders"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    created_on = db.Column(db.DateTime, nullable=False)
     vendor_id = db.Column(db.Integer, db.ForeignKey('vendors.id'),
                           nullable=False)
-    #created_on = db.Column(db.DateTime, nullable=False)
 
     vendor = db.relationship('Vendor', backref="purchase_orders",
                              lazy="joined")

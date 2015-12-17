@@ -1,66 +1,132 @@
-<!DOCTYPE html>
-<html>
 
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Flask Inventory{% block title %}{% endblock %}</title>
-    <!-- meta -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="">
     <meta name="author" content="">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Dashboard</title>
     <!-- styles -->
     <link href="//maxcdn.bootstrapcdn.com/bootswatch/3.3.1/yeti/bootstrap.min.css" rel="stylesheet" media="screen">
+
     <link href="{{ url_for('static', filename='main.css')}}" rel="stylesheet" media="screen">
     {% block css %}{% endblock %}
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
   </head>
 
   <body>
 
-    {% include 'header.html' %}
+    <!-- Top Navigation Menu -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="{{ url_for('main.home') }}">Inventory</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            {% if current_user.is_authenticated() %}
+            <li><a href="{{ url_for('user.logout') }}">Logout</a></li>
+            {% else %}
+            <li><a href="{{ url_for('user.login') }}"><span class="glyphicon glyphicon-user"></span>&nbsp;Register/Login</a></li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
 
-    <div class="site-content">
-      <div class="container">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <!-- Sidebar Menu !-->
+          <ul class="nav nav-sidebar">
+            {% if current_user.is_authenticated() %}
+            <li><a href="{{ url_for("inventory.view")}}">Vendors</a></li>
+            <li>
+              <ul class="nav nav-sidebar-submenu">
+                <li><a href="{{ url_for("inventory.view")}}">View</a></li>
+                <li><a href="{{ url_for("inventory.register")}}">Add</a></li>
+              </ul>
+            </li>
+            <li><a href="#">Purchase Orders</a></li>
+            <ul class="nav nav-sidebar-submenu">
+              <li><a href="#">View</a></li>
+              <li><a href="#">Add Orders</a></li>
+            </ul>
+            <li><a href="#">Components</a></li>
+            <ul class="nav nav-sidebar-submenu">
+              <li><a href="#">View</a></li>
+              <li><a href="#">Add Orders</a></li>
+            </ul>
+              {% else %}
+              {% endif %}
 
-        <!-- messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        <br>
-        <div class="row">
-          <div class="col-md-12">
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">
-              <a class="close" title="Close" href="#" data-dismiss="alert">&times;</a>
-             {{message}}
+            </ul>
+        </div>
+        <!-- Body Content !-->
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+          <div>
+            <!-- messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <br>
+            <div class="row">
+              <div class="col-md-12">
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                  <a class="close" title="Close" href="#" data-dismiss="alert">&times;</a>
+                  {{message}}
+                </div>
+                {% endfor %}
+              </div>
             </div>
-            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+
+            <!-- child template -->
+            {% block content %}{% endblock %}
+
+            <br>
+
+            <!-- errors -->
+            {% if error %}
+            <p class="error"><strong>Error:</strong> {{ error }}</p>
+            {% endif %}
           </div>
         </div>
-        {% endif %}
-        {% endwith %}
-
-
-        <!-- child template -->
-        {% block content %}{% endblock %}
-
-        <br>
-
-        <!-- errors -->
-        {% if error %}
-          <p class="error"><strong>Error:</strong> {{ error }}</p>
-        {% endif %}
-
       </div>
     </div>
 
-    <br><br>
-
     {% include 'footer.html' %}
 
-    <!-- scripts -->
-    <script src="//code.jquery.com/jquery-1.11.2.min.js" type="text/javascript"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js" type="text/javascript"></script>
-    <script src="{{url_for('static', filename='main.js')}}" type="text/javascript"></script>
-    {% block js %}{% endblock %}
+    <!-- Bootstrap core JavaScript
+      ================================================== -->
+      <!-- Placed at the end of the document so the pages load faster -->
+      <!-- scripts -->
+      <script src="//code.jquery.com/jquery-1.11.2.min.js" type="text/javascript"></script>
+      <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js" type="text/javascript"></script>
+      <script src="{{url_for('static', filename='main.js')}}" type="text/javascript"></script>
+      {% block js %}{% endblock %}
 
+
+      <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+      <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
   </body>
 </html>

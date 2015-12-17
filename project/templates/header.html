@@ -18,13 +18,13 @@
           <li><a href="{{ url_for('main.about') }}">About</a></li>
           {% if current_user.is_authenticated() %}
            <li>
-               <a href="{{ url_for('vendor.view') }}" 
+               <a href="{{ url_for('inventory.view') }}" 
                   class="dropdown-toggle" data-toggle="dropdown" 
                   role="button">Vendors<span class="caret"></span>
                </a>
                <ul class="dropdown-menu">
-                   <li><a href="{{ url_for('vendor.view') }}">View</a></li>
-                   <li><a href="{{ url_for('vendor.register') }}">Add</a></li>
+                   <li><a href="{{ url_for('inventory.view') }}">View</a></li>
+                   <li><a href="{{ url_for('inventory.register') }}">Add</a></li>
                </ul>
 
            </li>

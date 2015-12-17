@@ -3,27 +3,27 @@
 #################
 #### imports ####
 #################
-
+import datetime
 from flask import render_template, Blueprint, url_for, \
     redirect, flash, request, jsonify
 from flask.ext.login import login_required
 
 from project import db
 from project.models import Vendor, PurchaseOrder, LineItem, Component
-from project.vendor.forms import RegisterForm, PurchaseOrderForm
+from project.inventory.forms import RegisterForm, PurchaseOrderForm
 
 ################
 #### config ####
 ################
 
-vendor_blueprint = Blueprint('vendor', __name__,)
+inventory_blueprint = Blueprint('inventory', __name__,)
 
 
 ################
 #### routes ####
 ################
 
-@vendor_blueprint.route('/vendor/register', methods=['GET', 'POST'])
+@inventory_blueprint.route('/vendor/register', methods=['GET', 'POST'])
 @login_required
 def register():
     form = RegisterForm()
@@ -40,15 +40,16 @@ def register():
             db.session.commit()
 
             flash('New Vendor Added', 'success')
-            return redirect(url_for('vendor.view'))
+            return redirect(url_for('inventory.view'))
         else:
             flash('Vendor already exist')
-            return redirect(url_for('vendor.register'))
+            return redirect(url_for('inventory.register'))
 
-    return render_template('vendor/register.html', form=form)
+    return render_template('inventory/register.html', form=form)
 
 
-@vendor_blueprint.route('/vendor/edit/<int:vendor_id>', methods=['GET', 'POST'])
+@inventory_blueprint.route('/vendor/edit/<int:vendor_id>',
+                           methods=['GET', 'POST'])
 @login_required
 def edit(vendor_id):
     vendor = Vendor.query.get_or_404(vendor_id)
@@ -58,18 +59,26 @@ def edit(vendor_id):
         db.session.commit()
 
         flash('Vendor Updated', 'success')
-        return redirect(url_for('vendor.view'))
-    return render_template('vendor/edit.html', form=form)
+        return redirect(url_for('inventory.view'))
+    return render_template('inventory/edit.html', form=form)
 
 
-@vendor_blueprint.route('/vendor/view', methods=['GET', 'POST'])
+@inventory_blueprint.route('/vendor/view/', methods=['GET'])
 @login_required
 def view():
     vendors = Vendor.query.all()
-    return render_template('/vendor/view_all.html', entries=vendors)
+    return render_template('/inventory/view_all.html', entries=vendors)
 
 
-@vendor_blueprint.route('/purchase_order/create/<int:vendor_id>',
+@inventory_blueprint.route('/view/<int:vendor_id>', methods=['GET'])
+@login_required
+def view_vendor(vendor_id):
+    vendor = Vendor.query.get_or_404(vendor_id)
+    purchase_orders = PurchaseOrder.query.filter_by(vendor_id=vendor.id)
+    return render_template('inventory/view_vendor.html', vendor=vendor,
+                           purchase_orders = purchase_orders)
+
+@inventory_blueprint.route('/purchase_order/create/<int:vendor_id>',
                         methods=['GET', 'POST'])
 @login_required
 def purchase_order(vendor_id):
@@ -78,6 +87,7 @@ def purchase_order(vendor_id):
     if form.validate_on_submit():
         with db.session.no_autoflush:
             order = PurchaseOrder()
+            order.created_on = datetime.date.today()
             order.vendor = vendor
             db.session.add(order)
             component = Component.query.get(int(form.item.data))
@@ -87,18 +97,19 @@ def purchase_order(vendor_id):
             order.line_items.append(line1)
         db.session.commit()
 
-        flash('Vendor Updated', 'success')
-        return redirect(url_for('vendor.view_purchase_order'))
-    return render_template('vendor/purchase_order.html', form=form)
+        flash('Purchase Order Added', 'success')
+        return redirect(url_for('inventory.view_purchase_order', po_id=order.id))
+    return render_template('inventory/purchase_order.html', form=form,
+                           vendor=vendor)
 
-@vendor_blueprint.route('/purchase_order/view/<int:po_id>',
+@inventory_blueprint.route('/purchase_order/view/<int:po_id>',
                         methods=['GET', 'POST'])
 @login_required
 def view_purchase_order(po_id):
     po = PurchaseOrder.query.get_or_404(po_id)
-    return render_template('/vendor/view_po.html', entries=po)
+    return render_template('/inventory/view_po.html', entries=po)
 
-@vendor_blueprint.route('/vendor/search', methods=['GET'])
+@inventory_blueprint.route('/vendor/search', methods=['GET'])
 @login_required
 def search():
     """ Doesn't work. """
