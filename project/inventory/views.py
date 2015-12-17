@@ -16,7 +16,9 @@ from project.inventory.forms import RegisterForm, PurchaseOrderForm
 #### config ####
 ################
 
-inventory_blueprint = Blueprint('inventory', __name__,)
+inventory_blueprint = Blueprint('inventory',
+                                __name__,
+                                template_folder='templates')
 
 
 ################
@@ -45,7 +47,7 @@ def register():
             flash('Vendor already exist')
             return redirect(url_for('inventory.register'))
 
-    return render_template('inventory/register.html', form=form)
+    return render_template('vendor/register.html', form=form)
 
 
 @inventory_blueprint.route('/vendor/edit/<int:vendor_id>',
@@ -67,7 +69,7 @@ def edit(vendor_id):
 @login_required
 def view():
     vendors = Vendor.query.all()
-    return render_template('/inventory/view_all.html', entries=vendors)
+    return render_template('/vendor/view_all.html', entries=vendors)
 
 
 @inventory_blueprint.route('/view/<int:vendor_id>', methods=['GET'])
