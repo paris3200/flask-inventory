@@ -7,16 +7,16 @@
     <h1>Purchase Order</h1>
   </header>
   <h2>Vendor</h2>
-  <h3>{{ entries.vendor.name }}</h3>
+  <h3>{{ result.vendor.name }}</h3>
   <p>
-  {% if entries.vendor.website: %}
-    {{ entries.vendor.website }}<br>
+  {% if result.vendor.website: %}
+    {{ result.vendor.website }}<br>
   {% endif %}
-  {{ entries.vendor.line1 }}<br>
-  {% if entries.vendor.line2: %}
-    {{ entries.vendor.line2 }}<br>
+  {{ result.vendor.line1 }}<br>
+  {% if result.vendor.line2: %}
+    {{ result.vendor.line2 }}<br>
   {% endif %}
-  {{ entries.vendor.city }}, {{ entries.vendor.state }} {{ entries.vendor.zip }}, {{ entries.vendor.state }}<br>
+  {{ result.vendor.city }}, {{ result.vendor.state }} {{ result.vendor.zip }}, {{ result.vendor.state }}<br>
   </p>
 
   <table class="table table-striped table-bordered table-hover">
@@ -27,7 +27,7 @@
         <th>Unit Price</th>
         <th>Total</th>
     </tr>
-    {% for line_item in entries.line_items %}
+    {% for line_item in result.line_items %}
         <tr>
             <td>{{ line_item.component_id }}</td>
             <td>{{ line_item.component.name }}</td>

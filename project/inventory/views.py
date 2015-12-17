@@ -5,7 +5,7 @@
 #################
 import datetime
 from flask import render_template, Blueprint, url_for, \
-    redirect, flash, request, jsonify
+    redirect, flash, request
 from flask.ext.login import login_required
 
 from project import db
@@ -25,9 +25,29 @@ inventory_blueprint = Blueprint('inventory',
 #### routes ####
 ################
 
-@inventory_blueprint.route('/vendor/register', methods=['GET', 'POST'])
+
+################
+#### Vendor ####
+################
+
+
+@inventory_blueprint.route('/vendor/<int:vendor_id>', methods=['GET'])
+@inventory_blueprint.route('/vendor/', methods=['GET'])
 @login_required
-def register():
+def view_vendor(vendor_id = None):
+    if vendor_id:
+        vendor = Vendor.query.get_or_404(vendor_id)
+        orders = PurchaseOrder.query.filter_by(vendor_id=vendor.id)
+        return render_template('vendor/view.html', vendor=vendor,
+                            purchase_orders = orders)
+    vendors = Vendor.query.all()
+    return render_template('/vendor/view_all.html', entries=vendors)
+
+
+
+@inventory_blueprint.route('/vendor/create', methods=['GET', 'POST'])
+@login_required
+def create_vendor():
     form = RegisterForm()
     if form.validate_on_submit():
         vendor = Vendor.query.filter_by(name=form.name.data).first()
@@ -42,18 +62,18 @@ def register():
             db.session.commit()
 
             flash('New Vendor Added', 'success')
-            return redirect(url_for('inventory.view'))
+            return redirect(url_for('view_vendor'))
         else:
             flash('Vendor already exist')
-            return redirect(url_for('inventory.register'))
+            return redirect(url_for('create_vendor'))
 
-    return render_template('vendor/register.html', form=form)
+    return render_template('vendor/create.html', form=form)
 
 
 @inventory_blueprint.route('/vendor/edit/<int:vendor_id>',
                            methods=['GET', 'POST'])
 @login_required
-def edit(vendor_id):
+def edit_vendor(vendor_id):
     vendor = Vendor.query.get_or_404(vendor_id)
     form = RegisterForm(obj=vendor)
     if form.validate_on_submit():
@@ -61,29 +81,34 @@ def edit(vendor_id):
         db.session.commit()
 
         flash('Vendor Updated', 'success')
-        return redirect(url_for('inventory.view'))
-    return render_template('inventory/edit.html', form=form)
+        return redirect(url_for('view_vendor'))
+    return render_template('vendor/edit.html', form=form)
 
 
-@inventory_blueprint.route('/vendor/view/', methods=['GET'])
+#########################
+#### Purchase Orders ####
+#########################
+
+
+
+@inventory_blueprint.route('/purchase_order/')
+@inventory_blueprint.route('/purchase_order/<int:po_id>',
+                        methods=['GET', 'POST'])
 @login_required
-def view():
-    vendors = Vendor.query.all()
-    return render_template('/vendor/view_all.html', entries=vendors)
+def view_purchase_order(po_id = None):
+    if po_id:
+        order = PurchaseOrder.query.get_or_404(po_id)
+        return render_template('/purchase_order/view.html',
+                               result=order)
+    purchase_orders = PurchaseOrder.query.all()
+    return render_template('/purchase_order/view_all.html',
+                           result=purchase_orders)
 
-
-@inventory_blueprint.route('/view/<int:vendor_id>', methods=['GET'])
-@login_required
-def view_vendor(vendor_id):
-    vendor = Vendor.query.get_or_404(vendor_id)
-    purchase_orders = PurchaseOrder.query.filter_by(vendor_id=vendor.id)
-    return render_template('inventory/view_vendor.html', vendor=vendor,
-                           purchase_orders = purchase_orders)
 
 @inventory_blueprint.route('/purchase_order/create/<int:vendor_id>',
                         methods=['GET', 'POST'])
 @login_required
-def purchase_order(vendor_id):
+def create_purchase_order(vendor_id):
     vendor = Vendor.query.get_or_404(vendor_id)
     form = PurchaseOrderForm()
     if form.validate_on_submit():
@@ -101,23 +126,6 @@ def purchase_order(vendor_id):
 
         flash('Purchase Order Added', 'success')
         return redirect(url_for('inventory.view_purchase_order', po_id=order.id))
-    return render_template('inventory/purchase_order.html', form=form,
+    return render_template('/purchase_order/create.html', form=form,
                            vendor=vendor)
 
-@inventory_blueprint.route('/purchase_order/view/<int:po_id>',
-                        methods=['GET', 'POST'])
-@login_required
-def view_purchase_order(po_id):
-    po = PurchaseOrder.query.get_or_404(po_id)
-    return render_template('/inventory/view_po.html', entries=po)
-
-@inventory_blueprint.route('/vendor/search', methods=['GET'])
-@login_required
-def search():
-    """ Doesn't work. """
-    form_name = request.args.get('name')
-    vendors = Vendor.query.filter(Vendor.name.like(form_name)).all()
-    result = []
-    for v in vendors:
-        result.append(v.as_dict()['name'])
-    return jsonify(name=result)

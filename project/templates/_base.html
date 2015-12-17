@@ -56,22 +56,21 @@
           <!-- Sidebar Menu !-->
           <ul class="nav nav-sidebar">
             {% if current_user.is_authenticated() %}
-            <li><a href="{{ url_for("inventory.view")}}">Vendors</a></li>
+            <li><a href="{{ url_for("inventory.view_vendor")}}">Vendors</a></li>
             <li>
               <ul class="nav nav-sidebar-submenu">
-                <li><a href="{{ url_for("inventory.view")}}">View</a></li>
-                <li><a href="{{ url_for("inventory.register")}}">Add</a></li>
+                <li><a href="{{ url_for("inventory.view_vendor")}}">View</a></li>
+                <li><a href="{{ url_for("inventory.create_vendor")}}">Add</a></li>
               </ul>
             </li>
-            <li><a href="#">Purchase Orders</a></li>
+            <li><a href="{{ url_for("inventory.view_purchase_order")}}">Purchase Orders</a></li>
             <ul class="nav nav-sidebar-submenu">
-              <li><a href="#">View</a></li>
-              <li><a href="#">Add Orders</a></li>
+                <li><a href="{{ url_for("inventory.view_purchase_order")}}">View</a></li>
             </ul>
             <li><a href="#">Components</a></li>
             <ul class="nav nav-sidebar-submenu">
               <li><a href="#">View</a></li>
-              <li><a href="#">Add Orders</a></li>
+              <li><a href="#">Create</a></li>
             </ul>
               {% else %}
               {% endif %}
