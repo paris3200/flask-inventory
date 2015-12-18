@@ -10,7 +10,8 @@ from flask.ext.login import login_required
 
 from project import db
 from project.models import Vendor, PurchaseOrder, LineItem, Component
-from project.inventory.forms import RegisterForm, PurchaseOrderForm
+from project.inventory.forms import VendorCreateForm, PurchaseOrderForm, \
+    ComponentCreateForm
 
 ################
 #### config ####
@@ -48,7 +49,7 @@ def view_vendor(vendor_id = None):
 @inventory_blueprint.route('/vendor/create', methods=['GET', 'POST'])
 @login_required
 def create_vendor():
-    form = RegisterForm()
+    form = VendorCreateForm()
     if form.validate_on_submit():
         vendor = Vendor.query.filter_by(name=form.name.data).first()
         if vendor is None:
@@ -62,11 +63,10 @@ def create_vendor():
             db.session.commit()
 
             flash('New Vendor Added', 'success')
-            return redirect(url_for('view_vendor'))
+            return redirect(url_for('.view_vendor'))
         else:
-            flash('Vendor already exist')
-            return redirect(url_for('create_vendor'))
-
+            flash('Vendor already exist.')
+            return redirect(url_for('.view_vendor'))
     return render_template('vendor/create.html', form=form)
 
 
@@ -75,13 +75,13 @@ def create_vendor():
 @login_required
 def edit_vendor(vendor_id):
     vendor = Vendor.query.get_or_404(vendor_id)
-    form = RegisterForm(obj=vendor)
+    form = VendorCreateForm(obj=vendor)
     if form.validate_on_submit():
         form.populate_obj(vendor)
         db.session.commit()
 
         flash('Vendor Updated', 'success')
-        return redirect(url_for('view_vendor'))
+        return redirect(url_for('.view_vendor'))
     return render_template('vendor/edit.html', form=form)
 
 
@@ -125,7 +125,42 @@ def create_purchase_order(vendor_id):
         db.session.commit()
 
         flash('Purchase Order Added', 'success')
-        return redirect(url_for('inventory.view_purchase_order', po_id=order.id))
+        return redirect(url_for('.view_purchase_order', po_id=order.id))
     return render_template('/purchase_order/create.html', form=form,
                            vendor=vendor)
 
+@inventory_blueprint.route('/component/create', methods=['GET', 'POST'])
+@login_required
+def create_component():
+    form = ComponentCreateForm()
+    if form.validate_on_submit():
+        component = Component.query.filter_by(name=form.name.data).first()
+        if component is None:
+            component = Component(name=form.name.data)
+            db.session.add(component)
+            db.session.commit()
+
+            flash('New Component Added', 'success')
+            return redirect(url_for('.view_component'))
+        else:
+            flash('Component already exist.')
+            return redirect(url_for('.view_component'))
+    return render_template('component/create.html', form=form)
+
+@inventory_blueprint.route('/component/<int:vendor_id>', methods=['GET'])
+@inventory_blueprint.route('/component/', methods=['GET'])
+@login_required
+def view_component(component_id = None):
+    if component_id:
+        component = Component.query.get_or_404(component_id)
+        return render_template('component/view.html', result=component)
+    component = Component.query.all()
+    return render_template('/component/view_all.html', result=component)
+
+def flash_errors(form):
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error
+            ), 'danger')

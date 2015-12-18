@@ -12,21 +12,7 @@ STATE_ABBREV = ('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
                 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY')
 
 
-class RegisterForm(Form):
-    name = TextField('Company', validators=[DataRequired()])
-    contact = TextField('Contact')
-    line1 = TextField('Address 1')
-    line2 = TextField('Address 2')
-    line3 = TextField('Address 3')
-    city = TextField('City')
-    state = SelectField('State',
-                        choices=[(state, state) for state in STATE_ABBREV])
-    zipcode = TextField('Zipcode')
-    phone = TextField('Phone')
-    website = TextField('Website')
-
-
-class EditForm(Form):
+class VendorCreateForm(Form):
     name = TextField('Company', validators=[DataRequired()])
     contact = TextField('Contact')
     line1 = TextField('Address 1')
@@ -44,3 +30,6 @@ class PurchaseOrderForm(Form):
     item = IntegerField('Item Id', validators=[DataRequired()])
     quantity = IntegerField('Quantity', validators=[DataRequired()])
     unit_price = TextField('Unit Price', validators=[DataRequired()])
+
+class ComponentCreateForm(Form):
+    name = TextField('Name', validators=[DataRequired()])
