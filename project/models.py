@@ -74,6 +74,7 @@ class PurchaseOrder(db.Model):
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+
 class LineItem(db.Model):
     __tablename__ = "line_items"
 

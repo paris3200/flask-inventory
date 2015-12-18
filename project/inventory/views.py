@@ -117,13 +117,18 @@ def create_purchase_order(vendor_id):
             order.created_on = datetime.date.today()
             order.vendor = vendor
             db.session.add(order)
-            component = Component.query.get(int(form.item.data))
-            line1 = LineItem(component=component,
-                             quantity=form.quantity.data,
-                             unit_price=form.unit_price.data)
-            order.line_items.append(line1)
+            component = Component.query.filter_by(id=int(form.item.data)).first()
+            if component:
+                line1 = LineItem(component=component,
+                                quantity=form.quantity.data,
+                                unit_price=form.unit_price.data)
+                order.line_items.append(line1)
+            else:
+                flash('Component not found.')
+                return render_template('/purchase_order/create.html',
+                                       form=form,
+                                       vendor=vendor)
         db.session.commit()
-
         flash('Purchase Order Added', 'success')
         return redirect(url_for('.view_purchase_order', po_id=order.id))
     return render_template('/purchase_order/create.html', form=form,
@@ -145,9 +150,8 @@ def create_component():
         else:
             flash('Component already exist.')
             return redirect(url_for('.view_component'))
-    return render_template('component/create.html', form=form)
 
-@inventory_blueprint.route('/component/<int:vendor_id>', methods=['GET'])
+@inventory_blueprint.route('/component/<int:component_id>', methods=['GET'])
 @inventory_blueprint.route('/component/', methods=['GET'])
 @login_required
 def view_component(component_id = None):
@@ -156,11 +160,3 @@ def view_component(component_id = None):
         return render_template('component/view.html', result=component)
     component = Component.query.all()
     return render_template('/component/view_all.html', result=component)
-
-def flash_errors(form):
-    for field, errors in form.errors.items():
-        for error in errors:
-            flash(u"Error in the %s field - %s" % (
-                getattr(form, field).label.text,
-                error
-            ), 'danger')
