@@ -1,10 +1,5 @@
-# Flask Skeleton
+# Flask Inventory
 
-Flask starter project...
-
-[![Build Status](https://travis-ci.org/realpython/flask-skeleton.svg?branch=master)](https://travis-ci.org/realpython/flask-skeleton)
-
-[![Coverage Status](https://coveralls.io/repos/realpython/flask-skeleton/badge.svg?branch=master&service=github)](https://coveralls.io/github/realpython/flask-skeleton?branch=master)
 
 ## Quick Start
 

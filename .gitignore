@@ -15,6 +15,7 @@ tmp/
 # database files
 *.sqlite
 dev.sqlite
+migrations/
 
 # virtualenv environments
 env*/
