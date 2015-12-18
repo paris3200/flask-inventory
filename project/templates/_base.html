@@ -67,10 +67,10 @@
             <ul class="nav nav-sidebar-submenu">
                 <li><a href="{{ url_for("inventory.view_purchase_order")}}">View</a></li>
             </ul>
-            <li><a href="#">Components</a></li>
+            <li><a href="{{ url_for("inventory.view_component") }}">Component</a></li>
             <ul class="nav nav-sidebar-submenu">
-              <li><a href="#">View</a></li>
-              <li><a href="#">Create</a></li>
+              <li><a href="{{ url_for("inventory.view_component") }}">View</a></li>
+              <li><a href="{{ url_for("inventory.create_component") }}">Create</a></li>
             </ul>
               {% else %}
               {% endif %}
@@ -86,7 +86,7 @@
             {% if messages %}
             <br>
             <div class="row">
-              <div class="col-md-12">
+              <div>
                 {% for category, message in messages %}
                 <div class="alert alert-{{ category }}">
                   <a class="close" title="Close" href="#" data-dismiss="alert">&times;</a>
@@ -125,7 +125,5 @@
       {% block js %}{% endblock %}
 
 
-      <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-      <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
   </body>
 </html>
