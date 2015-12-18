@@ -150,7 +150,7 @@ def create_component():
         else:
             flash('Component already exist.')
             return redirect(url_for('.view_component'))
-    return render_template('/component/create.html')
+    return render_template('/component/create.html', form=form)
 
 
 @inventory_blueprint.route('/component/<int:component_id>', methods=['GET'])

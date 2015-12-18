@@ -5,13 +5,12 @@ import unittest
 
 
 from base import BaseTestCase
-from project.models import Vendor, LineItem, Component
+from project.models import LineItem, Component
 from project.inventory.forms import VendorCreateForm, PurchaseOrderForm, \
     ComponentCreateForm
 
 
 class TestInventoryBlueprint(BaseTestCase):
-
 
     def login(self):
         self.client.post(
@@ -26,6 +25,44 @@ class TestInventoryBlueprint(BaseTestCase):
             '/vendor/create',
             data=dict(name=vendorName, state=vendorState),
             follow_redirects=True)
+
+    def test_create_vendor_route(self):
+        # Ensure register behaves correctly when logged in.
+        with self.client:
+            self.login()
+        # Ensure about route behaves correctly.
+        response = self.client.get('/vendor/create', follow_redirects=True)
+        self.assertIn(b'<h1>Create Vendor</h1>\n', response.data)
+
+    def test_create_vendor_route_requires_login(self):
+        # Ensure member route requres logged in user.
+        response = self.client.get('/vendor/create', follow_redirects=True)
+        self.assertIn(b'Please log in to access this page', response.data)
+
+    def test_vendor_registration(self):
+        with self.client:
+            self.login()
+            response = self.create_vendor()
+        self.assertIn(b'<h1>Vendors</h1>', response.data)
+        self.assertEqual(response.status_code, 200)
+
+    def test_vendor_disallows_duplicate_registration(self):
+        with self.client:
+            self.login()
+            self.create_vendor()
+            response = self.client.post(
+                '/vendor/create',
+                data=dict(name="Achme", state="NC"),
+                follow_redirects=True)
+        self.assertIn(b'Vendor already exist.', response.data)
+        self.assertEqual(response.status_code, 200)
+
+    def test_edit_vendor_route_fails_with_invalid_vendor(self):
+        with self.client:
+            self.login()
+            response = self.client.get('/vendor/edit/1000',
+                                    follow_redirects=True)
+        self.assertEqual(response.status_code, 404)
 
     def create_component(self, name="widget"):
         self.login()
@@ -42,14 +79,6 @@ class TestInventoryBlueprint(BaseTestCase):
                          data=dict(item=item, quantity=quantity, unit_price=2),
                          follow_redirects=True)
 
-
-    def test_create_vendor_route(self):
-        # Ensure register behaves correctly when logged in.
-        with self.client:
-            self.login()
-        # Ensure about route behaves correctly.
-        response = self.client.get('/vendor/create', follow_redirects=True)
-        self.assertIn(b'<h1>Create Vendor</h1>\n', response.data)
 
     def test_view_all_vendors(self):
         with self.client:
@@ -75,13 +104,6 @@ class TestInventoryBlueprint(BaseTestCase):
         self.assertIn(b'value="Achme"', response.data)
 
 
-    def test_edit_vendor_route_fails_with_invalid_vendor(self):
-        with self.client:
-            self.login()
-            response = self.client.get('/vendor/edit/1000',
-                                    follow_redirects=True)
-        self.assertEqual(response.status_code, 404)
-
     def test_edit_updates_to_database(self):
         with self.client:
             self.login()
@@ -93,11 +115,6 @@ class TestInventoryBlueprint(BaseTestCase):
         self.assertIn(b'Achme LLC', response.data)
 
 
-    def test_create_vendor_route_requires_login(self):
-        # Ensure member route requres logged in user.
-        response = self.client.get('/vendor/create', follow_redirects=True)
-        self.assertIn(b'Please log in to access this page', response.data)
-
     def test_view_route_requires_login(self):
         # Ensure member route requres logged in user.
         response = self.client.get('/vendor/', follow_redirects=True)
@@ -107,24 +124,6 @@ class TestInventoryBlueprint(BaseTestCase):
         # Ensure member route requres logged in user.
         response = self.client.get('/vendor/edit/1', follow_redirects=True)
         self.assertIn(b'Please log in to access this page', response.data)
-
-    def test_vendor_registration(self):
-        with self.client:
-            self.login()
-            response = self.create_vendor()
-        self.assertIn(b'<h1>Vendors</h1>', response.data)
-        self.assertEqual(response.status_code, 200)
-
-    def test_vendor_disallows_duplicate_registration(self):
-        with self.client:
-            self.login()
-            self.create_vendor()
-            response = self.client.post(
-                '/vendor/create',
-                data=dict(name="Achme", state="NC"),
-                follow_redirects=True)
-        self.assertIn(b'Vendor already exist.', response.data)
-        self.assertEqual(response.status_code, 200)
 
     def test_validate_registration_form(self):
         form  = VendorCreateForm(name="Achme",
@@ -141,7 +140,7 @@ class TestInventoryBlueprint(BaseTestCase):
             response = self.client.get('/inventory/view_po/1001', follow_redirects=True)
         self.assertEqual(response.status_code, 404)
 
-    def test_validate_purchase_order_form(self):
+    def test_validate_purchase_order_form_data(self):
         form = PurchaseOrderForm(item="1", quantity="10", unit_price="2.99")
         self.assertTrue(form.validate())
 
