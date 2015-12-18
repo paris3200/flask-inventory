@@ -1,11 +1,11 @@
 # project/vendor/views.py
 
 #################
-#### imports ####
+#    imports    #
 #################
 import datetime
 from flask import render_template, Blueprint, url_for, \
-    redirect, flash, request
+    redirect, flash
 from flask.ext.login import login_required
 
 from project import db
@@ -14,7 +14,7 @@ from project.inventory.forms import VendorCreateForm, PurchaseOrderForm, \
     ComponentCreateForm
 
 ################
-#### config ####
+#    config    #
 ################
 
 inventory_blueprint = Blueprint('inventory',
@@ -23,27 +23,26 @@ inventory_blueprint = Blueprint('inventory',
 
 
 ################
-#### routes ####
+#    routes    #
 ################
 
 
 ################
-#### Vendor ####
+#    Vendor    #
 ################
 
 
 @inventory_blueprint.route('/vendor/<int:vendor_id>', methods=['GET'])
 @inventory_blueprint.route('/vendor/', methods=['GET'])
 @login_required
-def view_vendor(vendor_id = None):
+def view_vendor(vendor_id=None):
     if vendor_id:
         vendor = Vendor.query.get_or_404(vendor_id)
         orders = PurchaseOrder.query.filter_by(vendor_id=vendor.id)
         return render_template('vendor/view.html', vendor=vendor,
-                            purchase_orders = orders)
+                               purchase_orders=orders)
     vendors = Vendor.query.all()
     return render_template('/vendor/view_all.html', entries=vendors)
-
 
 
 @inventory_blueprint.route('/vendor/create', methods=['GET', 'POST'])
@@ -86,16 +85,15 @@ def edit_vendor(vendor_id):
 
 
 #########################
-#### Purchase Orders ####
+#    Purchase Orders    #
 #########################
-
 
 
 @inventory_blueprint.route('/purchase_order/')
 @inventory_blueprint.route('/purchase_order/<int:po_id>',
-                        methods=['GET', 'POST'])
+                           methods=['GET', 'POST'])
 @login_required
-def view_purchase_order(po_id = None):
+def view_purchase_order(po_id=None):
     if po_id:
         order = PurchaseOrder.query.get_or_404(po_id)
         return render_template('/purchase_order/view.html',
@@ -106,7 +104,7 @@ def view_purchase_order(po_id = None):
 
 
 @inventory_blueprint.route('/purchase_order/create/<int:vendor_id>',
-                        methods=['GET', 'POST'])
+                           methods=['GET', 'POST'])
 @login_required
 def create_purchase_order(vendor_id):
     vendor = Vendor.query.get_or_404(vendor_id)
@@ -117,11 +115,12 @@ def create_purchase_order(vendor_id):
             order.created_on = datetime.date.today()
             order.vendor = vendor
             db.session.add(order)
-            component = Component.query.filter_by(id=int(form.item.data)).first()
+            component = Component.query.filter_by(
+                id=int(form.item.data)).first()
             if component:
                 line1 = LineItem(component=component,
-                                quantity=form.quantity.data,
-                                unit_price=form.unit_price.data)
+                                 quantity=form.quantity.data,
+                                 unit_price=form.unit_price.data)
                 order.line_items.append(line1)
             else:
                 flash('Component not found.')
@@ -133,6 +132,7 @@ def create_purchase_order(vendor_id):
         return redirect(url_for('.view_purchase_order', po_id=order.id))
     return render_template('/purchase_order/create.html', form=form,
                            vendor=vendor)
+
 
 @inventory_blueprint.route('/component/create', methods=['GET', 'POST'])
 @login_required
@@ -150,11 +150,13 @@ def create_component():
         else:
             flash('Component already exist.')
             return redirect(url_for('.view_component'))
+    return render_template('/component/create.html')
+
 
 @inventory_blueprint.route('/component/<int:component_id>', methods=['GET'])
 @inventory_blueprint.route('/component/', methods=['GET'])
 @login_required
-def view_component(component_id = None):
+def view_component(component_id=None):
     if component_id:
         component = Component.query.get_or_404(component_id)
         return render_template('component/view.html', result=component)
