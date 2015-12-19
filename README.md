@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/paris3200/flask-inventory.svg)](https://travis-ci.org/paris3200/flask-inventory)
+[![Build Status](https://travis-ci.org/paris3200/flask-inventory.svg)](https://travis-ci.org/paris3200/flask-inventory)[![Coverage Status](https://coveralls.io/repos/paris3200/flask-inventory/badge.svg?branch=master&service=github)](https://coveralls.io/github/paris3200/flask-inventory?branch=master)
 
 # Flask Inventory
 
