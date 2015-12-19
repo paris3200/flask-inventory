@@ -8,9 +8,13 @@ python:
 install:
   - pip install -r requirements.txt
   - pip install coveralls
+  - pip install nosetest
+    
 
 script:
-  - python manage.py cov
+  - nosetests --with-coverage --cover-erase --cover-package=project
 
 after_success:
-  coveralls
+ - if [[ $ENV == python=3.5* ]]; then
+            coveralls;
+                  fi

@@ -1,6 +1,5 @@
 # manage.py
 
-
 import os
 import unittest
 import coverage
@@ -52,6 +51,19 @@ def cov():
     print('HTML version: file://%s/index.html' % covdir)
     COV.erase()
 
+
+@manager.command
+def coveralls():
+    """Runs the unit tests with coverage."""
+    tests = unittest.TestLoader().discover('tests')
+    unittest.TextTestRunner(verbosity=2).run(tests)
+    COV.stop()
+    COV.save()
+    COV.report()
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    covdir = os.path.join(basedir, 'tmp/coverage')
+    COV.html_report(directory=covdir)
+    COV.erase()
 
 @manager.command
 def create_db():
