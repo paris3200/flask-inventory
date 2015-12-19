@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/paris3200/flask-inventory.svg)](https://travis-ci.org/paris3200/flask-inventory)
+
 # Flask Inventory
 
 Flask Inventory is an attempt to create an inventory management system for
