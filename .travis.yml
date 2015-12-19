@@ -15,6 +15,4 @@ script:
   - nosetests --with-coverage --cover-erase --cover-package=project
 
 after_success:
- - if [[ $ENV == python=3.5* ]]; then
-            coveralls;
-                  fi
+  - coveralls;
