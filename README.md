@@ -3,7 +3,8 @@
 # Flask Inventory
 
 Flask Inventory is an attempt to create an inventory management system for
-a small business using the flask framework.  
+a small business using the flask framework.  Currently the project is under heavy
+development.  
 
 
 
