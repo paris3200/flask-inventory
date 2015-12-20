@@ -83,12 +83,12 @@ class LineItem(db.Model):
     unit_price = db.Column(db.Numeric(12, 2), nullable=False)
 
     purchase_order_id = db.Column(db.Integer,
-                               db.ForeignKey('purchase_orders.id'),
-                               nullable=False)
+                                  db.ForeignKey('purchase_orders.id'),
+                                  nullable=False)
 
     component_id = db.Column(db.Integer,
-                          db.ForeignKey('components.id'),
-                          nullable=False)
+                             db.ForeignKey('components.id'),
+                             nullable=False)
 
     purchase_order = db.relationship("PurchaseOrder", backref='line_items',
                                      lazy="joined")
@@ -106,4 +106,5 @@ class Component(db.Model):
     __tablename__ = "components"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(120), nullable=False)
+    sku = db.Column(db.String(5), unique=True, nullable=False)
+    description = db.Column(db.String(), nullable=False)

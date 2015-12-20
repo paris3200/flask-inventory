@@ -30,7 +30,7 @@
     {% for line_item in result.line_items %}
         <tr>
             <td>{{ line_item.component_id }}</td>
-            <td>{{ line_item.component.name }}</td>
+            <td>{{ line_item.component.description }}</td>
             <td>{{ line_item.quantity }}</td>
             <td>{{ line_item.unit_price }}</td>
             <td>{{ line_item.total_price }}</td>

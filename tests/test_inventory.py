@@ -64,11 +64,11 @@ class TestInventoryBlueprint(BaseTestCase):
                                     follow_redirects=True)
         self.assertEqual(response.status_code, 404)
 
-    def create_component(self, name="widget"):
+    def create_component(self, description="widget"):
         self.login()
         return self.client.post(
             '/component/create',
-            data=dict(name=name),
+            data=dict(sku="12345", description=description),
             follow_redirects=True)
 
     def create_purchase_order(self, item=1, quantity=10):
@@ -148,8 +148,8 @@ class TestInventoryBlueprint(BaseTestCase):
         form = PurchaseOrderForm(quantity="10", unit_price="2.99")
         self.assertFalse(form.validate())
 
-    def test_validate_purchase_order_form(self):
-        form = ComponentCreateForm(name="Widget")
+    def test_validate_component_create_form(self):
+        form = ComponentCreateForm(sku="12345", description="Widget")
         self.assertTrue(form.validate())
 
     def test_invalidate_create_component_form(self):

@@ -31,5 +31,7 @@ class PurchaseOrderForm(Form):
     quantity = IntegerField('Quantity', validators=[DataRequired()])
     unit_price = TextField('Unit Price', validators=[DataRequired()])
 
+
 class ComponentCreateForm(Form):
-    name = TextField('Name', validators=[DataRequired()])
+    sku = TextField('Sku', validators=[DataRequired()])
+    description = TextField('Description', validators=[DataRequired()])

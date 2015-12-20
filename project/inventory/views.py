@@ -139,9 +139,10 @@ def create_purchase_order(vendor_id):
 def create_component():
     form = ComponentCreateForm()
     if form.validate_on_submit():
-        component = Component.query.filter_by(name=form.name.data).first()
+        component = Component.query.filter_by(sku=form.sku.data).first()
         if component is None:
-            component = Component(name=form.name.data)
+            component = Component(sku=form.sku.data,
+                                  description=form.description.data)
             db.session.add(component)
             db.session.commit()
 
