@@ -3,7 +3,7 @@
 
 import unittest
 
-from base import BaseTestCase
+from tests.base import BaseTestCase
 from project.models import LineItem, Component
 from project.inventory.forms import VendorCreateForm, PurchaseOrderForm, \
     ComponentCreateForm
