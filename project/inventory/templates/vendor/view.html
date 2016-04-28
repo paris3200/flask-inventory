@@ -4,14 +4,14 @@
 {% block content %}
 <div>
     {{ vendor.name }}<br>
-    {{ vendor.line1}}<br>
-    {% if vendor.line2 %}
-        {{ vendor.line2 }}<br>
+    {{ vendor.address.line1}}<br>
+    {% if vendor.address.line2 %}
+        {{ vendor.address.line2 }}<br>
     {% endif %}
-    {% if vendor.line3 %}
-        {{ vendor.line3 }}<br>
+    {% if vendor.address.line3 %}
+        {{ vendor.address.line3 }}<br>
     {% endif %}
-    {{ vendor.city}}, {{ vendor.state}} {{ vendor.zipcode }}<br>
+    {{ vendor.address.city}}, {{ vendor.address.state}} {{ vendor.address.zipcode }}<br>
 
     {% if vendor.website %}
         {{ vendor.website }}<br>

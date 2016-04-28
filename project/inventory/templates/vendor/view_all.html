@@ -30,12 +30,12 @@
         <td>{{ entry.contact|safe }}</td>
         <td>{{ entry.phone|safe }}</td>
         <td>
-            {{ entry.line1|safe }}<br>
-            {{ entry.line2|safe }}
+            {{ entry.address.line1|safe }}<br>
+            {{ entry.address.line2|safe }}
         </td>
-        <td>{{ entry.city|safe }}</td>
-        <td>{{ entry.state|safe }}</td>
-        <td>{{ entry.zipcode|safe }}</td>
+        <td>{{ entry.address.city|safe }}</td>
+        <td>{{ entry.address.state|safe }}</td>
+        <td>{{ entry.address.zipcode|safe }}</td>
         <td>
             <a href="/purchase_order/create/{{ entry.id }}">Create PO</a> | 
             <a href="/vendor/edit/{{ entry.id }}">Edit</a>

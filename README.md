@@ -41,6 +41,10 @@ $ python manage.py runserver
 
 ### Testing
 
+```sh
+$ export APP_SETTINGS="project.config.TestingConfig"
+```
+
 Without coverage:
 
 ```sh

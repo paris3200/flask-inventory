@@ -47,17 +47,23 @@ class Vendor(db.Model):
     contact = db.Column(db.String(120))
     phone = db.Column(db.String(15))
     website = db.Column(db.String(120))
-    line1 = db.Column(db.String(120))
-    line2 = db.Column(db.String(120))
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(2))
-    zipcode = db.Column(db.String(16))
+    address_id = db.Column(db.Integer, db.ForeignKey('address.id'))
 
     def __repr__(self):
         return '<Vendor {0}>'.format(self.name)
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
+class Address(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    line1 = db.Column(db.String(120))
+    line2 = db.Column(db.String(120))
+    city = db.Column(db.String(120))
+    state = db.Column(db.String(2))
+    zipcode = db.Column(db.String(16))
+    vendor = db.relationship("Vendor", backref='address')
 
 
 class PurchaseOrder(db.Model):

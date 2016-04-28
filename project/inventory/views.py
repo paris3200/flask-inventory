@@ -9,7 +9,7 @@ from flask import render_template, Blueprint, url_for, \
 from flask.ext.login import login_required
 
 from project import db
-from project.models import Vendor, PurchaseOrder, LineItem, Component
+from project.models import Vendor, PurchaseOrder, LineItem, Component, Address
 from project.inventory.forms import VendorCreateForm, PurchaseOrderForm, \
     ComponentCreateForm
 
@@ -51,21 +51,27 @@ def create_vendor():
     form = VendorCreateForm()
     if form.validate_on_submit():
         vendor = Vendor.query.filter_by(name=form.name.data).first()
-        if vendor is None:
-            vendor = Vendor(name=form.name.data,
-                            contact=form.contact.data,
-                            phone=form.phone.data, website=form.website.data,
-                            line1=form.line1.data, line2=form.line2.data,
-                            city=form.city.data, state=form.state.data,
-                            zipcode=form.zipcode.data)
-            db.session.add(vendor)
-            db.session.commit()
+        address = Address.query.filter_by(line1=form.line1.data).first()
+        with db.session.no_autoflush:
+            if address is None:
+                address = Address(line1=form.line1.data, line2=form.line2.data,
+                                  city=form.city.data, state=form.state.data,
+                                  zipcode=form.zipcode.data)
+                db.session.add(address)
+            if vendor is None:
+                vendor = Vendor(name=form.name.data,
+                                contact=form.contact.data,
+                                phone=form.phone.data,
+                                website=form.website.data,
+                                address=address)
+                db.session.add(vendor)
+                db.session.commit()
 
-            flash('New Vendor Added', 'success')
-            return redirect(url_for('.view_vendor'))
-        else:
-            flash('Vendor already exist.')
-            return redirect(url_for('.view_vendor'))
+                flash('New Vendor Added', 'success')
+                return redirect(url_for('.view_vendor'))
+            else:
+                flash('Vendor already exist.')
+                return redirect(url_for('.view_vendor'))
     return render_template('vendor/create.html', form=form)
 
 
