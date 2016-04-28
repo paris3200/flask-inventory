@@ -12,11 +12,11 @@
   {% if result.vendor.website: %}
     {{ result.vendor.website }}<br>
   {% endif %}
-  {{ result.vendor.line1 }}<br>
-  {% if result.vendor.line2: %}
-    {{ result.vendor.line2 }}<br>
+  {{ result.vendor.address.line1 }}<br>
+  {% if result.vendor.address.line2: %}
+    {{ result.vendor.address.line2 }}<br>
   {% endif %}
-  {{ result.vendor.city }}, {{ result.vendor.state }} {{ result.vendor.zip }}<br>
+  {{ result.vendor.address.city }}, {{ result.vendor.address.state }} {{ result.vendor.address.zip }}<br>
   </p>
 
   <table class="table table-striped table-bordered table-hover">
