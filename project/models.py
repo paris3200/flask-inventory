@@ -86,7 +86,7 @@ class LineItem(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     quantity = db.Column(db.Integer, nullable=False)
-    unit_price = db.Column(db.Numeric(12, 2), nullable=False)
+    total_price = db.Column(db.Numeric(12, 2), nullable=False)
 
     purchase_order_id = db.Column(db.Integer,
                                   db.ForeignKey('purchase_orders.id'),
@@ -101,8 +101,8 @@ class LineItem(db.Model):
     component = db.relationship("Component", uselist=False)
 
     @hybrid_property
-    def total_price(self):
-        return self.quantity * self.unit_price
+    def unit_price(self):
+        return self.total_price / self.quantity
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}

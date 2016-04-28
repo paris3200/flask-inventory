@@ -14,6 +14,9 @@ development.
 
 1. Activate a virtualenv
 1. Install the requirements
+```sh
+$ pip install -r requirements.txt
+```
 
 ### Set Environment Variables
 

@@ -126,7 +126,7 @@ def create_purchase_order(vendor_id):
             if component:
                 line1 = LineItem(component=component,
                                  quantity=form.quantity.data,
-                                 unit_price=form.unit_price.data)
+                                 total_price=form.total_price.data)
                 order.line_items.append(line1)
             else:
                 flash('Component not found.')

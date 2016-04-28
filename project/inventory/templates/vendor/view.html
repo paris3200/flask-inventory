@@ -14,7 +14,7 @@
     {{ vendor.address.city}}, {{ vendor.address.state}} {{ vendor.address.zipcode }}<br>
 
     {% if vendor.website %}
-        {{ vendor.website }}<br>
+    <a href="{{ vendor.website }}">{{ vendor.website }}</a><br>
     {% endif %}
     {% if vendor.phone %}
         {{ vendor.phone }}<br>

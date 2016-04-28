@@ -3,7 +3,7 @@
 
 import unittest
 
-from base import BaseTestCase
+from tests.base import BaseTestCase
 from project.models import LineItem, Component
 from project.inventory.forms import VendorCreateForm, PurchaseOrderForm, \
     ComponentCreateForm
@@ -19,15 +19,19 @@ class TestInventoryBlueprint(BaseTestCase):
         )
 
     def create_vendor(self, vendorName="Achme",
-                      vendoraddress="123 Coyote Ln",
-                      vendorcity="Desert Plain",
-                      vendorState="CO"):
-        self.login()
-        return self.client.post(
-            '/vendor/create',
-            data=dict(name=vendorName, line1=vendoraddress,
-                      city=vendorcity, state=vendorState),
-            follow_redirects=True)
+                        vendoraddress="123 Coyote Ln",
+                        vendorcity="Desert Plain",
+                        vendorState="CO",
+                        vendorWebsite="http://www.achme.com"):
+            self.login()
+            return self.client.post(
+                '/vendor/create',
+                data=dict(name=vendorName,
+                          line1=vendoraddress,
+                          city=vendorcity,
+                          state=vendorState,
+                          website=vendorWebsite),
+                follow_redirects=True)
 
     def test_create_vendor_route(self):
         # Ensure register behaves correctly when logged in.
@@ -36,6 +40,13 @@ class TestInventoryBlueprint(BaseTestCase):
             # Ensure about route behaves correctly.
             response = self.client.get('/vendor/create', follow_redirects=True)
             self.assertIn(b'<h1>Create Vendor</h1>\n', response.data)
+
+    def test_create_vendor_website_not_required(self):
+        with self.client:
+            self.login()
+            response = self.create_vendor(vendorWebsite="")
+        self.assertIn(b'<h1>Vendors</h1>', response.data)
+        self.assertEqual(response.status_code, 200)
 
     def test_create_vendor_route_requires_login(self):
         # Ensure member route requres logged in user.
@@ -53,12 +64,9 @@ class TestInventoryBlueprint(BaseTestCase):
         with self.client:
             self.login()
             self.create_vendor()
-            response = self.client.post(
-                '/vendor/create',
-                data=dict(name="Achme", state="NC"),
-                follow_redirects=True)
-            self.assertIn(b'Vendor already exist.', response.data)
-            self.assertEqual(response.status_code, 200)
+            response=self.create_vendor()
+        self.assertIn(b'Vendor already exist.', response.data)
+        self.assertEqual(response.status_code, 200)
 
     def test_edit_vendor_route_fails_with_invalid_vendor(self):
         with self.client:
@@ -74,14 +82,14 @@ class TestInventoryBlueprint(BaseTestCase):
             data=dict(sku="12345", description=description),
             follow_redirects=True)
 
+
     def create_purchase_order(self, item=1, quantity=10):
         self.login()
         self.create_vendor()
         self.create_component()
         return self.client.post('/purchase_order/create/1',
-                                data=dict(item=item, quantity=quantity,
-                                          unit_price=2),
-                                follow_redirects=True)
+                         data=dict(item=item, quantity=quantity, total_price=2),
+                         follow_redirects=True)
 
     def test_view_all_vendors(self):
         with self.client:
@@ -114,13 +122,12 @@ class TestInventoryBlueprint(BaseTestCase):
             self.login()
             self.create_vendor()
             response = self.client.post('/vendor/edit/1',
-                                        data=dict(name="Achme LLC",
-                                                  line1="123 Roadrunner Way",
-                                                  state="NC"),
-                                        follow_redirects=True)
-            self.assertIn(b'<h1>Vendors</h1>\n', response.data)
-            self.assertIn(b'Achme LLC', response.data)
-            self.assertIn(b'123 Roadrunner Way', response.data)
+                                    data=dict(name="Achme LLC",
+                                              state="NC",
+                                              website="http://www.achme.com"),
+                                    follow_redirects=True)
+        self.assertIn(b'<h1>Vendors</h1>\n', response.data)
+        self.assertIn(b'Achme LLC', response.data)
 
     def test_view_route_requires_login(self):
         # Ensure member route requres logged in user.
@@ -133,12 +140,12 @@ class TestInventoryBlueprint(BaseTestCase):
         self.assertIn(b'Please log in to access this page', response.data)
 
     def test_validate_registration_form(self):
-        form = VendorCreateForm(name="Achme",
-                                contact="", phone="",
-                                website="www.achme.com",
-                                line1="", line2="",
-                                city="", state="NC",
-                                zipcode="")
+        form  = VendorCreateForm(name="Achme",
+                        contact="", phone="",
+                        website="http://www.achme.com",
+                        line1="", line2="",
+                        city="", state="NC",
+                        zipcode="")
         self.assertTrue(form.validate())
 
     def test_view_purchase_order_404_with_unknown_id(self):
@@ -149,7 +156,7 @@ class TestInventoryBlueprint(BaseTestCase):
             self.assertEqual(response.status_code, 404)
 
     def test_validate_purchase_order_form_data(self):
-        form = PurchaseOrderForm(item="1", quantity="10", unit_price="2.99")
+        form = PurchaseOrderForm(item="1", quantity="10", total_price="2.99")
         self.assertTrue(form.validate())
 
     def test_invalid_purchase_order_form(self):
@@ -185,8 +192,8 @@ class TestInventoryBlueprint(BaseTestCase):
             self.create_component()
 
         widget = Component.query.get(1)
-        lineitem = LineItem(component=widget, quantity=10, unit_price=10.99)
-        self.assertTrue(lineitem.total_price, 109.90)
+        lineitem = LineItem(component=widget, quantity=10, total_price=10.00)
+        self.assertTrue(lineitem.total_price, 1.00)
 
     def test_view_purchase_order(self):
         with self.client:
