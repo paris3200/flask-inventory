@@ -90,7 +90,7 @@ class TestInventoryBlueprint(BaseTestCase):
         self.create_vendor()
         self.create_component()
         return self.client.post('/purchase_order/create/1',
-                         data=dict(item=item, quantity=quantity, unit_price=2),
+                         data=dict(item=item, quantity=quantity, total_price=2),
                          follow_redirects=True)
 
 
@@ -157,7 +157,7 @@ class TestInventoryBlueprint(BaseTestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_validate_purchase_order_form_data(self):
-        form = PurchaseOrderForm(item="1", quantity="10", unit_price="2.99")
+        form = PurchaseOrderForm(item="1", quantity="10", total_price="2.99")
         self.assertTrue(form.validate())
 
     def test_invalid_purchase_order_form(self):
@@ -193,8 +193,8 @@ class TestInventoryBlueprint(BaseTestCase):
             self.create_component()
 
         widget = Component.query.get(1)
-        lineitem = LineItem(component=widget, quantity=10, unit_price=10.99)
-        self.assertTrue(lineitem.total_price, 109.90)
+        lineitem = LineItem(component=widget, quantity=10, total_price=10.00)
+        self.assertTrue(lineitem.total_price, 1.00)
 
     def test_view_purchase_order(self):
         with self.client:
