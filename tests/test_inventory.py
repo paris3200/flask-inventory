@@ -202,6 +202,9 @@ class TestInventoryBlueprint(BaseTestCase):
             response = self.client.get('/purchase_order/1',
                                        follow_redirects=True)
             self.assertIn(b'Achme', response.data)
+            self.assertIn(b'123 Coyote Ln', response.data)
+            self.assertIn(b'CO', response.data)
+            self.assertIn(b'http://www.achme.com', response.data)
             self.assertIn(b'widget', response.data)
 
     def test_view_purchase_order_all(self):
