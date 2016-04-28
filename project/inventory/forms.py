@@ -30,7 +30,7 @@ class VendorCreateForm(Form):
 class PurchaseOrderForm(Form):
     item = IntegerField('Item Id', validators=[DataRequired()])
     quantity = IntegerField('Quantity', validators=[DataRequired()])
-    unit_price = TextField('Unit Price', validators=[DataRequired()])
+    total_price = TextField('Total Item  Price', validators=[DataRequired()])
 
 
 class ComponentCreateForm(Form):
