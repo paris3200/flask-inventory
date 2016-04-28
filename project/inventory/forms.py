@@ -3,7 +3,7 @@
 
 from flask_wtf import Form
 from wtforms import TextField, SelectField, IntegerField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, URL, Optional
 
 STATE_ABBREV = ('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
                 'HI', 'ID', 'IL', 'IN', 'IO', 'KS', 'KY', 'LA', 'ME', 'MD',
@@ -23,13 +23,15 @@ class VendorCreateForm(Form):
                         choices=[(state, state) for state in STATE_ABBREV])
     zipcode = TextField('Zipcode')
     phone = TextField('Phone')
-    website = TextField('Website')
+    website = TextField('Website', validators=[Optional(strip_whitespace=True),
+                                               URL(require_tld=True)])
 
 
 class PurchaseOrderForm(Form):
     item = IntegerField('Item Id', validators=[DataRequired()])
     quantity = IntegerField('Quantity', validators=[DataRequired()])
     unit_price = TextField('Unit Price', validators=[DataRequired()])
+
 
 class ComponentCreateForm(Form):
     name = TextField('Name', validators=[DataRequired()])
