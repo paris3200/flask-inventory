@@ -65,6 +65,7 @@ def coveralls():
     COV.html_report(directory=covdir)
     COV.erase()
 
+
 @manager.command
 def create_db():
     """Creates the db tables."""
