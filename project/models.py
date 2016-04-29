@@ -75,16 +75,21 @@ class PurchaseOrder(db.Model):
     created_on = db.Column(db.DateTime, nullable=False)
     vendor_id = db.Column(db.Integer, db.ForeignKey('vendors.id'),
                           nullable=False)
-
     vendor = db.relationship('Vendor', backref="purchase_orders",
                              lazy="joined")
+    shipping = db.Column(db.Numeric(12, 2), nullable=False, default=0.00)
+    tax = db.Column(db.Numeric(12, 2), nullable=False, default=0.00)
 
     @hybrid_property
-    def total(self):
+    def sub_total(self):
         price = 0
         for line in self.line_items:
             price += line.total_price
         return price
+
+    @hybrid_property
+    def total(self):
+        return self.sub_total+self.shipping+self.tax
 
     def as_dict(self):
        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

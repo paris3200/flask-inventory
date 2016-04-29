@@ -37,6 +37,9 @@
         </tr>
     {% endfor %}
   </table>
-  <h4>{{ result.total }}</h4>
+  <h3>Sub Total: {{ result.sub_total }}</h3>
+  <h3>Shipping: {{ result.shipping }}</h3>
+  <h3>Tax: {{ result.tax }}</h3>
+  <h3>Total: {{ result.total }}</h3>
 
 {% endblock %}
