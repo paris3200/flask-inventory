@@ -3,6 +3,8 @@
 
 import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.sql.functions import sum
+
 
 from project import db, bcrypt
 
@@ -77,8 +79,18 @@ class PurchaseOrder(db.Model):
     vendor = db.relationship('Vendor', backref="purchase_orders",
                              lazy="joined")
 
+    @hybrid_property
+    def total(self):
+        price = 0
+        for line in self.line_items:
+            price += line.total_price
+        return price
+
     def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    def __repr__(self):
+        return dir(self)
 
 
 class LineItem(db.Model):

@@ -6,8 +6,8 @@
   <header class="content-header">
     <h1>Purchase Order</h1>
   </header>
-  <h2>Vendor</h2>
-  <h3>{{ result.vendor.name }}</h3>
+  <h3>Vendor</h3>
+  <h4>{{ result.vendor.name }}</h4>
   <p>
   {% if result.vendor.website: %}
     {{ result.vendor.website }}<br>
@@ -37,7 +37,6 @@
         </tr>
     {% endfor %}
   </table>
-
-  
+  <h4>{{ result.total }}</h4>
 
 {% endblock %}
