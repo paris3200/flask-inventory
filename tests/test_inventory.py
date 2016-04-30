@@ -83,12 +83,12 @@ class TestInventoryBlueprint(BaseTestCase):
             follow_redirects=True)
 
 
-    def create_purchase_order(self, item=1, quantity=10):
+    def create_purchase_order(self, sku=1001, quantity=10):
         self.login()
         self.create_vendor()
         self.create_component()
         return self.client.post('/purchase_order/create/1',
-                         data=dict(item=item, quantity=quantity, total_price=2),
+                         data=dict(sku=sku, quantity=quantity, total_price=2),
                          follow_redirects=True)
 
     def test_view_all_vendors(self):
@@ -156,7 +156,7 @@ class TestInventoryBlueprint(BaseTestCase):
             self.assertEqual(response.status_code, 404)
 
     def test_validate_purchase_order_form_data(self):
-        form = PurchaseOrderForm(item="1", quantity="10", total_price="2.99")
+        form = PurchaseOrderForm(sku="1001", quantity="10", total_price="2.99")
         self.assertTrue(form.validate())
 
     def test_invalid_purchase_order_form(self):
@@ -202,10 +202,9 @@ class TestInventoryBlueprint(BaseTestCase):
             response = self.client.get('/purchase_order/1',
                                        follow_redirects=True)
             self.assertIn(b'Achme', response.data)
-            self.assertIn(b'123 Coyote Ln', response.data)
             self.assertIn(b'CO', response.data)
             self.assertIn(b'http://www.achme.com', response.data)
-            self.assertIn(b'widget', response.data)
+            self.assertIn(b'SKU', response.data)
 
     def test_view_purchase_order_all(self):
         with self.client:
@@ -224,7 +223,7 @@ class TestInventoryBlueprint(BaseTestCase):
     def test_create_purchaseorder_requires_valid_component(self):
         with self.client:
             self.login()
-            response = self.create_purchase_order(item=5)
+            response = self.create_purchase_order(sku=1001)
             self.assertIn(b'<h1>Purchase Order</h1>', response.data)
             self.assertIn(b'Component not found.', response.data)
 
