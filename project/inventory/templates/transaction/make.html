@@ -1,0 +1,17 @@
+{% extends '_base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+
+  <header class="content-header">
+    <h1>Transactions</h1>
+  </header>
+
+  <form action="{{ url_for('inventory.checkin') }}" method="POST">
+    {{form.csrf_token}}
+    {{form.component}}
+    {{form.qty}}
+
+    {{form[the_action]}}
+  </form>
+{% endblock %}

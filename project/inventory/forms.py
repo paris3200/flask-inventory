@@ -2,7 +2,7 @@
 
 
 from flask_wtf import Form
-from wtforms import TextField, SelectField, IntegerField
+from wtforms import TextField, SelectField, IntegerField, SubmitField
 from wtforms.validators import DataRequired, URL, Optional
 
 STATE_ABBREV = ('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
@@ -36,3 +36,9 @@ class PurchaseOrderForm(Form):
 class ComponentCreateForm(Form):
     sku = TextField('Sku', validators=[DataRequired()])
     description = TextField('Description', validators=[DataRequired()])
+
+class TransactionForm(Form):
+    component = SelectField("Item", validators=[DataRequired()], coerce=int)
+    qty = IntegerField('Quantity', validators=[DataRequired()])
+    checkin = SubmitField("Check In")
+    checkout = SubmitField("Check Out")
