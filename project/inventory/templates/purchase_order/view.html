@@ -27,13 +27,13 @@
         <th>Unit Price</th>
         <th>Total</th>
     </tr>
-    {% for line_item in result.line_items %}
+    {% for l in result.line_item %}
         <tr>
-            <td>{{ line_item.component.sku }}</td>
-            <td>{{ line_item.component.description }}</td>
-            <td>{{ line_item.quantity }}</td>
-            <td>{{ line_item.unit_price }}</td>
-            <td>{{ line_item.total_price }}</td>
+            <td>{{ l.component.sku }}</td>
+            <td>{{ l.component.description }}</td>
+            <td>{{ l.quantity }}</td>
+            <td>{{ l.unit_price }}</td>
+            <td>{{ l.total_price }}</td>
         </tr>
     {% endfor %}
   </table>

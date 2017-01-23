@@ -169,7 +169,7 @@ def create_purchase_order(vendor_id):
                 line1 = LineItem(component=component,
                                  quantity=form.quantity.data,
                                  total_price=form.total_price.data)
-                order.line_items.append(line1)
+                order.line_item.append(line1)
             else:
                 flash('Component not found.')
                 return render_template('/purchase_order/create.html',
