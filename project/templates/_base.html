@@ -56,6 +56,12 @@
           <!-- Sidebar Menu !-->
           <ul class="nav nav-sidebar">
             {% if current_user.is_authenticated() %}
+            <li><a href="{{ url_for("inventory.transactions")}}">Transactions</a></li>
+            <li>
+              <ul class="nav nav-sidebar-submenu">
+                <li><a href="{{ url_for("inventory.transactions")}}">View</a></li>
+              </ul>
+            </li>
             <li><a href="{{ url_for("inventory.view_vendor")}}">Vendors</a></li>
             <li>
               <ul class="nav nav-sidebar-submenu">

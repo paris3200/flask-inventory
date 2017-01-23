@@ -5,13 +5,14 @@
 #################
 import datetime
 from flask import render_template, Blueprint, url_for, \
-    redirect, flash
+    redirect, flash, request
 from flask.ext.login import login_required
 
 from project import db
-from project.models import Vendor, PurchaseOrder, LineItem, Component, Address
+from project.models import Vendor, PurchaseOrder, LineItem, Component, Address, \
+    Transaction
 from project.inventory.forms import VendorCreateForm, PurchaseOrderForm, \
-    ComponentCreateForm
+    ComponentCreateForm, TransactionForm
 
 ################
 #    config    #
@@ -26,6 +27,47 @@ inventory_blueprint = Blueprint('inventory',
 #    routes    #
 ################
 
+@inventory_blueprint.route('/transactions/', methods=['GET'])
+@login_required
+def transactions():
+    transactions = Transaction.query.all()
+    return render_template("/transaction/transactions.html", transactions=transactions)
+
+@inventory_blueprint.route('/transactions/check-in', methods=['GET','POST'])
+@login_required
+def checkin():
+    form = TransactionForm(request.form)
+    form.component.choices = [(x.id, x.description) for x in Component.query.all()]
+    if form.validate_on_submit():
+        nt = Transaction()
+        form.component.data = Component.query.get(form.component.data)
+        form.populate_obj(nt)
+        nt.date_create = datetime.datetime.now()
+        if form.checkout.data:
+            nt.qty = form.qty.data * -1
+        db.session.add(nt)
+        db.session.commit()
+        flash('Success: Items Checked In')
+        return redirect(url_for('main.home'))
+    return render_template("/transaction/make.html", form=form, the_action="checkin")
+
+@inventory_blueprint.route('/transactions/check-out', methods=['GET','POST'])
+@login_required
+def checkout():
+    form = TransactionForm(request.form)
+    form.component.choices = [(x.id, x.description) for x in Component.query.all()]
+    if form.validate_on_submit():
+        nt = Transaction()
+        form.component.data = Component.query.get(form.component.data)
+        form.populate_obj(nt)
+        nt.date_create = datetime.datetime.now()
+        if form.checkout.data:
+            nt.qty = form.qty.data * -1
+        db.session.add(nt)
+        db.session.commit()
+        flash('Success: Items Checked Out')
+        return redirect(url_for('main.home'))
+    return render_template("/transaction/make.html", form=form, the_action="checkout")
 
 ################
 #    Vendor    #

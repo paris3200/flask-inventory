@@ -6,7 +6,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 class BaseConfig(object):
     """Base configuration."""
-    SECRET_KEY = '823d352a91a90aecd86d3d0dc5a5844894c24338ad13639bc593fdb20330d67a'
+    SECRET_KEY = '8abcd123352a91a90aecd86d3d0dc5a5844894c24338ad13639bc593fdb20330d67a'
     DEBUG = False
     BCRYPT_LOG_ROUNDS = 13
     WTF_CSRF_ENABLED = True
@@ -35,7 +35,7 @@ class TestingConfig(BaseConfig):
 
 class ProductionConfig(BaseConfig):
     """Production configuration."""
-    SECRET_KEY = 'ljUgreKnyvZRm8R77FkkoS9ab5duf0ypmABtkWPk3ESf8DnbVVL5K84ssyUEeSA'
+    SECRET_KEY = 'ljasdfUgreKnyvZRm8R77FkkoS9ab5duf0ypmABtkWPk3ESf8DnbVVL5K84ssyUEeSA'
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = 'postgresql:///inventory'
     DEBUG_TB_ENABLED = False

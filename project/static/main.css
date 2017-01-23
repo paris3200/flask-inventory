@@ -115,3 +115,10 @@ body {
   display: inline-block;
   border-radius: 50%;
 }
+
+ul.secondary-actions li {
+  padding: 20px 0px;
+}
+ul.secondary-actions a{
+  padding: 20px 20px;
+}
