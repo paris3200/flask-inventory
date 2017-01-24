@@ -6,7 +6,7 @@
 import datetime
 from flask import render_template, Blueprint, url_for, \
     redirect, flash, request
-from flask.ext.login import login_required
+from flask_login import login_required
 
 from project import db
 from project.models import Vendor, PurchaseOrder, LineItem, Component, Address, \
