@@ -4,7 +4,7 @@
 import datetime
 import unittest
 
-from flask.ext.login import current_user
+from flask_login import current_user
 from tests.base import BaseTestCase
 from project import bcrypt
 from project.models import User
