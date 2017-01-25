@@ -2,14 +2,6 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block content %}
-<script>
-$(document).ready(function() {
-  $("tr[data-id]").click(function(ev) {
-    var itemId = $(ev.target).attr("data-id");
-    document.location = "{{ url_for('inventory.view_component')}}/"+itemId;
-  });
-});
-</script>
 
   <header class="content-header">
     <h1>Components</h1>
