@@ -212,6 +212,34 @@ def view_component(component_id=None):
     component = Component.query.all()
     return render_template('/component/view_all.html', result=component)
 
+@inventory_blueprint.route('/manage-tags', methods=['GET','POST'])
+def manage_tags():
+    form = TagForm(request.form)
+    if form.validate_on_submit():
+        cat = form.category.data.strip().upper()
+        tag = form.tag_name.data.strip().upper()
+        cat_obj = TagCategory.query.filter_by(name=cat).first()
+        tag_obj = Tag.query.filter_by(name=tag).first()
+        if not cat_obj and cat:
+            cat_obj = TagCategory(cat)
+            db.session.add(cat_obj)
+            flash('Category %s Created' % cat)
+        if not tag_obj:
+            tag_obj = Tag(tag)
+            flash('Tag %s Created' % tag)
+            db.session.add(tag_obj)
+        db.session.commit()
+        if cat_obj and tag_obj not in cat_obj.tags:
+            cat_obj.tags.append(tag_obj)
+        db.session.commit()
+    categories = TagCategory.query.all()
+    uncategorized_tags = Tag.query.filter(Tag.categories == None).all()
+    print(uncategorized_tags)
+    print(Tag.query.all())
+
+    return render_template("/tags/tag-manager.html",
+        categories=categories, uncategorized_tags = uncategorized_tags, form=form)
+
 @inventory_blueprint.route('/tag-component/<int:component_id>', methods=['GET', 'POST'])
 def tag_component(component_id=None):
     form = TagForm(request.form)
@@ -221,19 +249,20 @@ def tag_component(component_id=None):
         tag = form.tag_name.data.strip().upper()
         cat_obj = TagCategory.query.filter_by(name=cat).first()
         tag_obj = Tag.query.filter_by(name=tag).first()
-        if not cat_obj:
+        if cat and not cat_obj:
             cat_obj = TagCategory(cat)
+            db.session.add(cat_obj)
         if not tag_obj:
             tag_obj = Tag(tag)
-        map(db.session.add, (cat_obj, tag_obj))
+            db.session.add(tag_obj)
         db.session.commit()
-        if tag_obj not in cat_obj.tags:
+        if cat_obj and tag_obj not in cat_obj.tags:
             cat_obj.tags.append(tag_obj)
         if tag_obj not in the_component.tags:
             the_component.tags.append(tag_obj)
         db.session.commit()
         flash("%s (%s) has been tagged with %s" % (the_component.description, the_component.sku, tag_obj.name))
-        return redirect(url_for('main.home'))
+        return redirect(url_for('inventory.view_component', component_id=component_id))
     categories = TagCategory.query.all()
     tags = Tag.query.all()
     return render_template("/component/tag-component.html", result=the_component, form=form,

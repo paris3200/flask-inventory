@@ -2,6 +2,14 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block content %}
+<script>
+$(document).ready(function() {
+  $("tr[data-id]").click(function(ev) {
+    var itemId = $(ev.target).attr("data-id");
+    document.location = "{{ url_for('inventory.view_component')}}/"+itemId;
+  });
+});
+</script>
 
   <header class="content-header">
     <h1>Components</h1>
@@ -14,8 +22,8 @@
         <th>QTY</th>
     </tr>
     {% for c in result %}
-        <tr>
-            <td>{{ c.sku }}</td>
+        <tr data-id="{{c.id}}">
+            <td><a href="{{ url_for('inventory.view_component', component_id=c.id)}}">{{ c.sku }}</a></td>
             <td>{{ c.description }}</td>
             <td>{{ c.qty }}</td>
         </tr>

@@ -169,7 +169,7 @@ class TagCategory(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(25), unique=True, nullable=False)
 
-    tags = db.relationship("Tag", secondary=tag_categories_tags, backref='category')
+    tags = db.relationship("Tag", secondary=tag_categories_tags, backref='categories')
 
     def __init__(self,name):
         self.name = name
@@ -180,6 +180,9 @@ class Tag(db.Model):
 
     def __init__(self,name):
         self.name = name
+
+    def __repr__(self):
+        return "%s in: %s" % (self.name, str(None) if self.categories == None else ",".join([x.name for x in self.categories]))
 
 
 
