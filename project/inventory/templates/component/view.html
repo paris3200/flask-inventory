@@ -16,6 +16,19 @@
             <td>{{ result.sku }}</td>
             <td>{{result.description }}</td>
         </tr>
+              <tr>
+        <td colspan="2">
+          <span style="">tags:</span>
+          <ul class="list-unstyled list-inline">
+          {% for t in result.tags %}
+            <li class="component-tag">{{t.name}}</li>
+          {% else %}
+            <li><i>Has not been tagged</i></li>
+          {% endfor %}
+          </ul>
+          <a href="{{ url_for('inventory.tag_component',component_id=result.id) }}" class="btn btn-primary">Add tag</a>
+        </td>
+      </tr>
   </table>
 
   

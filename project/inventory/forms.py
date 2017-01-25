@@ -42,3 +42,9 @@ class TransactionForm(Form):
     qty = IntegerField('Quantity', validators=[DataRequired()])
     checkin = SubmitField("Check In")
     checkout = SubmitField("Check Out")
+
+class TagForm(Form):
+    category = TextField("Category", validators=[DataRequired()] )
+    tag_name = TextField("Tag", validators=[DataRequired()])
+    make = SubmitField("OK")
+

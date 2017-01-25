@@ -8,6 +8,14 @@ from sqlalchemy.sql.functions import sum
 
 from project import db, bcrypt
 
+tag_categories_tags = db.Table('tag_categories_tags',
+    db.Column('tag_category_id', db.Integer(), db.ForeignKey('tag_category.id')),
+    db.Column('tag_id', db.Integer(), db.ForeignKey('tag.id')))
+
+components_tags = db.Table('components_tags',
+    db.Column('component_id', db.Integer(), db.ForeignKey('component.id')),
+    db.Column('tag_id', db.Integer(), db.ForeignKey('tag.id')))
+
 class Base(db.Model):
     __abstract__ = True
     id              = db.Column(db.Integer, primary_key=True)
@@ -138,6 +146,7 @@ class Component(db.Model):
     sku = db.Column(db.String(5), unique=True, nullable=False)
     description = db.Column(db.String(), nullable=False)
     
+    tags = db.relationship("Tag", secondary=components_tags, backref='component')
     @hybrid_property
     def qty(self):
         # the_query = Transaction.filter(Transaction.component_id == self.id)
@@ -154,6 +163,25 @@ class Transaction(Base):
                           nullable=False)
     component = db.relationship("Component", backref="transactions")
     qty = db.Column(db.Integer, nullable=False)
+
+class TagCategory(db.Model):
+    __tablename__ = "tag_category"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(25), unique=True, nullable=False)
+
+    tags = db.relationship("Tag", secondary=tag_categories_tags, backref='category')
+
+    def __init__(self,name):
+        self.name = name
+
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(25), unique=True, nullable=False)
+
+    def __init__(self,name):
+        self.name = name
+
+
 
 
 
