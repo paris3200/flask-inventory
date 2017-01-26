@@ -122,3 +122,11 @@ ul.secondary-actions li {
 ul.secondary-actions a{
   padding: 20px 20px;
 }
+
+li.component-tag {
+  border-radius: 5px;
+  padding:20px;
+  margin:20px;
+  font-size: 1.5em;
+  background-color: #66EEBB;
+}
