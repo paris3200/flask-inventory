@@ -235,3 +235,16 @@ class TestInventoryBlueprint(BaseTestCase):
             self.assertIn(b'widget', response.data)
             if __name__ == '__main__':
                 unittest.main()
+
+    def test_tag_component(self):
+        with self.client:
+            self.login()
+            self.create_component()
+            response = self.client.post(
+                '/tag-component/1',
+                data=dict(category='Region',
+                          tag_name='west coast'),
+                follow_redirects=True)
+            self.assertIn(b'has been tagged with', response.data)
+            self.assertIn(b'WEST COAST', response.data)
+

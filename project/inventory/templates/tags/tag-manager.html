@@ -1,0 +1,41 @@
+{% extends '_base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+
+  <header class="content-header">
+    <h1>Tag Manager</h1>
+  </header>
+  <h3>Tags With Categories</h3>
+  <ul class="list-unstyled list-inline">
+    {% for c in categories %}
+    {% for t in c.tags %}
+    <li class="component-tag"><span>{{ c.name }}</span>:<span>{{ t.name }}</span></li>
+    {% endfor %}
+    {% endfor %}
+  </ul>
+  <h3>Single Tags (not part of a category )</h3>
+  <ul class="list-unstyled list-inline">
+    {% for t in uncategorized_tags %}
+    <li class="component-tag"><span>{{ t.name }}</span></li>
+    {% endfor %}
+  </ul>
+
+
+  <h3>Create A New Tag</h3><i>click on any tag/category above to populate fields below</i>
+  <form method="POST" action="">
+    <div class="form-group">
+      {{form.category.label}}
+      {{form.category(class="form-control")}}
+    </div>
+    <div class="form-group">
+      {{form.tag_name.label}}
+      {{form.tag_name(class="form-control")}}
+    </div>
+    <div class="form-group">
+      {{form.make(class="btn btn-primary")}}
+    </div>
+  </form>
+  
+
+{% endblock %}

@@ -14,8 +14,8 @@
         <th>QTY</th>
     </tr>
     {% for c in result %}
-        <tr>
-            <td>{{ c.sku }}</td>
+        <tr data-id="{{c.id}}">
+            <td><a href="{{ url_for('inventory.view_component', component_id=c.id)}}">{{ c.sku }}</a></td>
             <td>{{ c.description }}</td>
             <td>{{ c.qty }}</td>
         </tr>
