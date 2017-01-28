@@ -6,6 +6,9 @@
 import datetime
 from flask import render_template, Blueprint, url_for, \
     redirect, flash, request
+
+from flask.views import View
+
 from flask_login import login_required
 
 from project import db
@@ -22,6 +25,41 @@ inventory_blueprint = Blueprint('inventory',
                                 __name__,
                                 template_folder='templates')
 
+################
+#    views     #
+################
+class TransactionMakerView(View):
+    methods = ["GET","POST"]
+    decorators = [login_required]
+    def __init__(self, action_type):
+        self.action_type = action_type
+    def get_template_name(self):
+        return '/transaction/make.html'
+
+    def render_template(self, context):
+        return render_template(self.get_template_name(), ** context)
+
+    def dispatch_request(self):
+        form = TransactionForm(request.form)
+        form.component.choices = [(x.id, x.description) for x in Component.query.all()]
+        if form.validate_on_submit():
+            nt = Transaction()
+            form.component.data = Component.query.get(form.component.data)
+            form.populate_obj(nt)
+            nt.date_create = datetime.datetime.now()
+            if form.checkout.data:
+                nt.qty = form.qty.data * (-1 if self.action_type == "checkout" else 1)
+            db.session.add(nt)
+            db.session.commit()
+            if self.action_type == 'checkin':
+                flash('Success: Items Checked In')
+            else:
+                flash('Success: Items Checked Out')
+            return redirect(url_for('main.home'))
+        return render_template("/transaction/make.html", form=form, the_action=self.action_type)
+
+
+
 
 ################
 #    routes    #
@@ -33,41 +71,12 @@ def transactions():
     transactions = Transaction.query.all()
     return render_template("/transaction/transactions.html", transactions=transactions)
 
-@inventory_blueprint.route('/transactions/check-in', methods=['GET','POST'])
-@login_required
-def checkin():
-    form = TransactionForm(request.form)
-    form.component.choices = [(x.id, x.description) for x in Component.query.all()]
-    if form.validate_on_submit():
-        nt = Transaction()
-        form.component.data = Component.query.get(form.component.data)
-        form.populate_obj(nt)
-        nt.date_create = datetime.datetime.now()
-        if form.checkout.data:
-            nt.qty = form.qty.data * -1
-        db.session.add(nt)
-        db.session.commit()
-        flash('Success: Items Checked In')
-        return redirect(url_for('main.home'))
-    return render_template("/transaction/make.html", form=form, the_action="checkin")
 
-@inventory_blueprint.route('/transactions/check-out', methods=['GET','POST'])
-@login_required
-def checkout():
-    form = TransactionForm(request.form)
-    form.component.choices = [(x.id, x.description) for x in Component.query.all()]
-    if form.validate_on_submit():
-        nt = Transaction()
-        form.component.data = Component.query.get(form.component.data)
-        form.populate_obj(nt)
-        nt.date_create = datetime.datetime.now()
-        if form.checkout.data:
-            nt.qty = form.qty.data * -1
-        db.session.add(nt)
-        db.session.commit()
-        flash('Success: Items Checked Out')
-        return redirect(url_for('main.home'))
-    return render_template("/transaction/make.html", form=form, the_action="checkout")
+inventory_blueprint.add_url_rule('/transactions/check-in', view_func=TransactionMakerView.as_view(
+    'checkin', action_type='checkin'))
+inventory_blueprint.add_url_rule('/transactions/check-out', view_func=TransactionMakerView.as_view(
+    'checkout', action_type='checkout'))
+
 
 ################
 #    Vendor    #

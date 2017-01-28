@@ -248,3 +248,32 @@ class TestInventoryBlueprint(BaseTestCase):
             self.assertIn(b'has been tagged with', response.data)
             self.assertIn(b'WEST COAST', response.data)
 
+    def test_checkin_checkout(self):
+        with self.client:
+            self.login()
+            self.create_component()
+            response = self.client.post(
+                '/transactions/check-in',
+                data=dict(component='1',
+                          qty='6',
+                          notes="Checking in 6 of em\'",
+                          checkin="Check In"),
+                follow_redirects=True)
+            self.assertIn(b'Items Checked In', response.data)
+            response = self.client.post(
+                '/transactions/check-in',
+                data=dict(component='1',
+                          qty='',
+                          notes="Checking in 6 of em\'",
+                          checkin="Check In"),
+                follow_redirects=True)
+            self.assertIn(b'qty', response.data)
+            response = self.client.post(
+                '/transactions/check-out',
+                data=dict(component='1',
+                          qty='',
+                          notes="Checking out 6 of em\'",
+                          checkout="Check Out"),
+                follow_redirects=True)
+            self.assertIn(b'qty', response.data)
+

@@ -40,6 +40,7 @@ class ComponentCreateForm(Form):
 class TransactionForm(Form):
     component = SelectField("Item", validators=[DataRequired()], coerce=int)
     qty = IntegerField('Quantity', validators=[DataRequired()])
+    notes  = TextField('Notes', validators=[DataRequired()])
     checkin = SubmitField("Check In")
     checkout = SubmitField("Check Out")
 

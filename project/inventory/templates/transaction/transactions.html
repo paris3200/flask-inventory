@@ -12,12 +12,14 @@
         <th>Item</th>
         <th>Time</th>
         <th>QTY</th>
+        <th>Notes</th>
     </tr>
     {% for c in transactions %}
         <tr>
             <td>{{ c.component.sku }}</td>
-            <td>{{ c.date_create }}</td>
+            <td>{{ c.date_create.strftime("%m/%d/%Y %H:%M %P  ") }}</td>
             <td>{{ c.qty }}</td>
+            <td>{{ c.notes }}</td>
         </tr>
 {% endfor %}
   </table>

@@ -162,6 +162,7 @@ class Transaction(Base):
     component_id = db.Column(db.Integer, db.ForeignKey('component.id'),
                           nullable=False)
     component = db.relationship("Component", backref="transactions")
+    notes = db.Column(db.String(40))
     qty = db.Column(db.Integer, nullable=False)
 
 class TagCategory(db.Model):
