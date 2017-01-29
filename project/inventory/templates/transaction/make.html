@@ -1,16 +1,70 @@
 {% extends '_base.html' %}
 {% import "bootstrap/wtf.html" as wtf %}
 
+{% block js %}
+{{super()}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.10/vue.min.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/vue.resource/1.1.0/vue-resource.min.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.0.3/vue-resource.min.js"></script>
+<script>
+$(document).ready(function() {
+  var app = new Vue({
+    el : '#search-app',
+    data : {
+      items : [],
+      singleTags : [],
+      checkedTags: [],
+    },
+    created : function() {
+      this.getItems();
+    },
+    methods : {
+      getItems : function() {
+        this.$http.get('/api/components').then(response => {
+          this.items = response.body;
+          console.log(this.items);
+        }, response => {
+          console.log('error getting components');
+        })
+      },
+      applyToCheckIn: function(theId) {
+        // select in form pull down
+        $("#component").val(theId);
+      },
+    }
+
+  })
+});
+</script>
+{% endblock %}
+
 {% block content %}
 
   <header class="content-header">
     <h1>Transactions</h1>
   </header>
-
+  {% raw %}
+  <div id="search-app">
+    <ul class="list-unstyled list-inline">
+      <li v-for="tag in singleTags"><input type="checkbox" v-bind:value="tag.name"></li></li>
+    </ul>
+    <table class="table">
+      <tr v-for="item in items">
+        <td><a v-on:click="applyToCheckIn(item.id)" class="btn btn-primary">
+          {{item.sku}}
+        </a></td>
+        <td>{{item.description}}</td>
+      </tr>
+    </table>
+  </div>
+  {% endraw %}
   <form action="{{ url_for('inventory.checkin') }}" method="POST">
     {{form.csrf_token}}
+    {{form.component.label(style="display:block")}}
     {{form.component}}
+    {{form.qty.label(style="display:block")}}
     {{form.qty}}
+    {{form.notes.label(style="display:block")}}
     {{form.notes}}
     {{form[the_action]}}
   </form>
