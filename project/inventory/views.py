@@ -157,7 +157,6 @@ def view_purchase_order(po_id=None):
 def create_purchase_order(vendor_id):
     vendor = Vendor.query.get_or_404(vendor_id)
     form = PurchaseOrderForm()
-    form.component.choices = [(x.id, x.description) for x in Component.query.all()]
     if form.validate_on_submit():
         with db.session.no_autoflush:
             order = PurchaseOrder()
