@@ -28,7 +28,8 @@ class VendorCreateForm(Form):
 
 
 class PurchaseOrderForm(Form):
-    component = SelectField("Item", validators=[DataRequired()], coerce=int)
+    component = SelectField("Look Up", validators=[Optional()], coerce=int, choices=[(0, 'Not Initialized')])
+    sku = TextField("Sku", validators=[DataRequired()])
     quantity = IntegerField('Quantity', validators=[DataRequired()])
     total_price = TextField('Total Item  Price', validators=[DataRequired()])
 

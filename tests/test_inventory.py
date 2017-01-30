@@ -91,7 +91,7 @@ class TestInventoryBlueprint(BaseTestCase):
         self.create_vendor()
         self.create_component()
         return self.client.post('/purchase_order/create/1',
-                         data=dict(id=sku, quantity=quantity, total_price=2),
+                         data=dict(sku=sku, quantity=quantity, total_price=2),
                          follow_redirects=True)
 
     def test_view_all_vendors(self):
