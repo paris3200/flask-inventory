@@ -174,6 +174,8 @@ class TagCategory(db.Model):
 
     def __init__(self,name):
         self.name = name
+    def __repr__(self):
+        return "Category Name: %s, Tags: %s" % (self.name, str(0) if self.tags==None else ",".join([x.name for x in self.tags]))
 
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
