@@ -1,0 +1,14 @@
+{% extends "_base.html" %}
+{% block content %}
+  <h1>Welcome, <em>{{ current_user.email }}</em>!</h1>
+  <div class="container">
+  	<div class="col-md-3">
+  		<a class="btn btn-primary" style="width:100%" href="{{ url_for('inventory.checkout')}}">Check Out</a>
+  	</div>   		
+  	<div class="col-md-3">
+   		<a class="btn btn-primary" style="width:100%" href="{{ url_for('inventory.checkin')}}">Check In</a>
+  	</div>
+<!--   <ul class="secondary-actions">
+  	<li></li>
+  </ul> -->
+{% endblock %}

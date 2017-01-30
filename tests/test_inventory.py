@@ -82,13 +82,16 @@ class TestInventoryBlueprint(BaseTestCase):
             data=dict(sku="12345", description=description),
             follow_redirects=True)
 
-
+    # sku is not part of the create purchase_order wtform
+    # component.id should be used instead.
+    # In the future, an API can be written at the model class level
+    # (SQLAlchemy) in order to create Purchase Orders and other tasks
     def create_purchase_order(self, sku=1001, quantity=10):
         self.login()
         self.create_vendor()
         self.create_component()
         return self.client.post('/purchase_order/create/1',
-                         data=dict(sku=sku, quantity=quantity, total_price=2),
+                         data=dict(id=sku, quantity=quantity, total_price=2),
                          follow_redirects=True)
 
     def test_view_all_vendors(self):

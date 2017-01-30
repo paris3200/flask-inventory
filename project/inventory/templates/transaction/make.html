@@ -14,23 +14,59 @@ $(document).ready(function() {
       items : [],
       singleTags : [],
       checkedTags: [],
+      sstr : '',
     },
     created : function() {
       this.getItems();
+      this.getSingleTags();
     },
     methods : {
       getItems : function() {
         this.$http.get('/api/components').then(response => {
           this.items = response.body;
-          console.log(this.items);
         }, response => {
           console.log('error getting components');
+        })
+      },
+      getSingleTags : function() {
+        this.$http.get('/api/single-tags').then(response => {
+          this.singleTags = response.body;
+        }, response => {
+          console.log('error getting single tags');
         })
       },
       applyToCheckIn: function(theId) {
         // select in form pull down
         $("#component").val(theId);
       },
+      isItemTagged : function(item) {
+        var cTags = this.checkedTags;
+        var found = false;
+        console.log(cTags);
+        item.tags.forEach(function(cv,idx) {
+          if ($.inArray(cv.name.toUpperCase(), cTags) != -1) {
+            console.log("FOUND ITEM");
+            console.log(cv.name, cTags);
+            console.log("/FOUND ITEM");
+            found = true;
+          }
+        });
+        return found;
+      }
+    },
+    computed: {
+      filteredItems : function() {
+        var str = this.sstr;
+        var cTags = this.checkedTags;
+        var isItemTagged = this.isItemTagged;
+        return this.items.filter(function(cv) {
+          return (
+            cv.sku.toLowerCase().indexOf(str) > -1 || 
+            cv.description.toLowerCase().indexOf(str) > -1);
+        }).filter(function(v) {
+          return (cTags.length == 0 || isItemTagged(v) );
+        });
+      }
     }
 
   })
@@ -41,15 +77,20 @@ $(document).ready(function() {
 {% block content %}
 
   <header class="content-header">
-    <h1>Transactions</h1>
+    <h1>Item Look Up</h1>
   </header>
   {% raw %}
   <div id="search-app">
+    <label for="sstr">Search:</label>&nbsp;
+    <input autocomplete="off" name="sstr" type="text" v-model="sstr">
     <ul class="list-unstyled list-inline">
-      <li v-for="tag in singleTags"><input type="checkbox" v-bind:value="tag.name"></li></li>
+      <li v-for="tag in singleTags">
+        <input type="checkbox" v-model="checkedTags" v-bind:value="tag.name">
+        {{tag.name}}
+      </li>
     </ul>
     <table class="table">
-      <tr v-for="item in items">
+      <tr v-for="item in filteredItems">
         <td><a v-on:click="applyToCheckIn(item.id)" class="btn btn-primary">
           {{item.sku}}
         </a></td>

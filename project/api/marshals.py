@@ -10,3 +10,9 @@ item = {
 	'description' : fields.String,
 	'tags' : fields.Nested(tag),
 }
+
+category = {
+	'id': fields.String,
+	'name' : fields.String,
+	'tags': fields.Nested(tag),
+}

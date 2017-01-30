@@ -174,7 +174,7 @@ def create_purchase_order(vendor_id):
             order.vendor = vendor
             db.session.add(order)
             component = Component.query.filter_by(
-                sku=form.sku.data).first()
+                id=form.component.data).first()
             if component:
                 line1 = LineItem(component=component,
                                  quantity=form.quantity.data,
