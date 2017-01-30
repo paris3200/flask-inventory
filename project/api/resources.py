@@ -2,7 +2,7 @@ from flask import Blueprint
 from flask_restful import Resource, Api, reqparse, marshal_with
 from flask_login import login_required
 from ..models import Component, Tag, components_tags, TagCategory
-from .project.api import marshals
+from .marshals import *
 
 api_module = Blueprint('api', __name__,  url_prefix = '/api')
 api = Api(api_module)
