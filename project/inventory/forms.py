@@ -29,7 +29,7 @@ class VendorCreateForm(Form):
 
 class PurchaseOrderForm(Form):
     component = SelectField("Look Up", validators=[Optional()], coerce=int, choices=[(0, 'Not Initialized')])
-    sku = TextField("Sku", validators=[DataRequired()])
+    sku = TextField("SKU", validators=[DataRequired()])
     quantity = IntegerField('Quantity', validators=[DataRequired()])
     total_price = TextField('Total Item  Price', validators=[DataRequired()])
 
@@ -38,7 +38,6 @@ class ComponentCreateForm(Form):
     sku = TextField('Sku', validators=[DataRequired()])
     description = TextField('Description', validators=[DataRequired()])
 
-
 class TransactionForm(Form):
     component = SelectField("Item", validators=[DataRequired()], coerce=int)
     qty = IntegerField('Quantity', validators=[DataRequired()])
@@ -46,8 +45,8 @@ class TransactionForm(Form):
     checkin = SubmitField("Check In")
     checkout = SubmitField("Check Out")
 
-
 class TagForm(Form):
-    category = TextField("Category", validators=[Optional()])
+    category = TextField("Category", validators=[Optional()] )
     tag_name = TextField("Tag", validators=[DataRequired()])
     make = SubmitField("OK")
+
