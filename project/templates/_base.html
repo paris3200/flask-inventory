@@ -56,6 +56,8 @@
           <!-- Sidebar Menu !-->
           <ul class="nav nav-sidebar">
             {% if current_user.is_authenticated() %}
+            <li><a class="btn btn-default" style="width:100%;text-transform:uppercase;font-weight:bold;" href="{{ url_for('inventory.checkin')}}">Check In</a></li>
+            <li><a class="btn btn-default" style="width:100%;text-transform:uppercase;font-weight:bold;" href="{{ url_for('inventory.checkout')}}">Check Out</a></li>
             <li><a href="{{ url_for("inventory.transactions")}}">Transactions</a></li>
             <li>
               <ul class="nav nav-sidebar-submenu">
