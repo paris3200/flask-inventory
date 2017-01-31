@@ -14,11 +14,14 @@ $(document).ready(function() {
       items : [],
       singleTags : [],
       checkedTags: [],
+      checkedCategoryTags: [],
+      categories: [],
       sstr : '',
     },
     created : function() {
       this.getItems();
       this.getSingleTags();
+      this.getCategories();
     },
     methods : {
       getItems : function() {
@@ -33,6 +36,13 @@ $(document).ready(function() {
           this.singleTags = response.body;
         }, response => {
           console.log('error getting single tags');
+        })
+      },
+      getCategories : function() {
+        this.$http.get('/api/categories').then(response => {
+          this.categories = response.body;
+        }, response => {
+          console.log('error getting categories');
         })
       },
       applyToCheckIn: function(theId) {
@@ -52,19 +62,37 @@ $(document).ready(function() {
           }
         });
         return found;
-      }
+      },
+      isItemCatTagged : function(item) {
+        var cTags = this.checkedCategoryTags;
+        var found = false;
+        console.log(cTags);
+        item.tags.forEach(function(cv,idx) {
+          if ($.inArray(cv.name.toUpperCase(), cTags) != -1) {
+            console.log("FOUND ITEM");
+            console.log(cv.name, cTags);
+            console.log("/FOUND ITEM");
+            found = true;
+          }
+        });
+        return found;
+      },
     },
     computed: {
       filteredItems : function() {
         var str = this.sstr;
         var cTags = this.checkedTags;
+        var cCatTags = this.checkedCategoryTags;
         var isItemTagged = this.isItemTagged;
+        var isItemCatTagged = this.isItemCatTagged;
         return this.items.filter(function(cv) {
           return (
             cv.sku.toLowerCase().indexOf(str) > -1 || 
             cv.description.toLowerCase().indexOf(str) > -1);
         }).filter(function(v) {
           return (cTags.length == 0 || isItemTagged(v) );
+        }).filter(function(nv) {
+          return (cCatTags.length == 0 || isItemCatTagged(nv));
         });
       }
     }
@@ -83,6 +111,17 @@ $(document).ready(function() {
   <div id="search-app">
     <label for="sstr">Search:</label>&nbsp;
     <input autocomplete="off" name="sstr" type="text" v-model="sstr">
+    <div style="display:inline-block">
+      <ul class="list-unstyled" style="margin-left:20px">
+        <li v-for="cat in categories"><strong>{{cat.name}}</strong>
+          <ul class="list-unstyled">
+            <li v-for="t in cat.tags">
+              <input type="checkbox" v-model="checkedCategoryTags" v-bind:value="t.name">
+              {{t.name}}</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
     <ul class="list-unstyled list-inline">
       <li v-for="tag in singleTags">
         <input type="checkbox" v-model="checkedTags" v-bind:value="tag.name">

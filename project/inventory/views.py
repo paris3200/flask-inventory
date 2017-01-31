@@ -48,13 +48,20 @@ class TransactionMakerView(View):
             form.populate_obj(nt)
             nt.date_create = datetime.datetime.now()
             if form.checkout.data:
-                nt.qty = form.qty.data * (-1 if self.action_type == "checkout" else 1)
-            db.session.add(nt)
-            db.session.commit()
-            if self.action_type == 'checkin':
-                flash('Success: Items Checked In')
-            else:
-                flash('Success: Items Checked Out')
+                nt.qty = form.qty.data * (-1)
+                if form.component.data.qty + nt.qty >= 0:
+                    db.session.add(nt)
+                    db.session.commit()
+                    flash('Success: Items Checked Out')
+                else:
+                    flash("Not enough items, only %s available" % (form.component.data.qty))
+                    form.component.data = form.component.data.id
+                    return render_template("/transaction/make.html", form=form, the_action=self.action_type)
+            elif form.checkin.data:
+                nt.qty = form.qty.data
+                db.session.add(nt)
+                db.session.commit()
+                flash('Success: %s Checked In' % ("Items" if nt.qty > 1 else "Item"))
             return redirect(url_for('main.home'))
         return render_template("/transaction/make.html", form=form, the_action=self.action_type)
 
