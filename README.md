@@ -45,6 +45,7 @@ $ python manage.py runserver
 You should then be able to view the application in the brower.  To access the admin section login with:
 
 Username: ad@min.com
+
 Password: admin_user
 
 ### Testing
