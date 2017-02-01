@@ -28,7 +28,7 @@ $ export APP_SETTINGS="project.config.DevelopmentConfig"
 
 ### Create DB
 
-Run setup.sh to setup the database. 
+Run _setup.sh_ to setup the database. 
 
 ```sh
 $  ./setup.sh
