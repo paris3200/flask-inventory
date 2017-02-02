@@ -126,11 +126,13 @@ class TestInventoryBlueprint(BaseTestCase):
         with self.client:
             self.login()
             self.create_vendor()
-            response = self.client.post('/vendor/edit/1',
-                                        data=dict(name="Achme LLC",
-                                                  state="NC",
-                                                  website="http://www.achme.com"),
-                                        follow_redirects=True)
+            response = self.client.post(
+                '/vendor/edit/1',
+                data=dict(
+                    name="Achme LLC",
+                    state="NC",
+                    website="http://www.achme.com"),
+                follow_redirects=True)
         self.assertIn(b'<h1>Vendors</h1>\n', response.data)
         self.assertIn(b'Achme LLC', response.data)
 
@@ -268,6 +270,44 @@ class TestInventoryBlueprint(BaseTestCase):
             self.assertIn(b'1', response.data)
             self.assertIn(b'6', response.data)
             self.assertIn(b'Checking in 6 of em', response.data)
+
+    def test_checkout_fails_availibility_exceeds_quantity(self):
+        with self.client:
+            self.login()
+            self.create_component()
+            self.client.post(
+                '/transactions/check-in',
+                data=dict(component='1',
+                          qty='6',
+                          notes="Checking in 6 of em\'",
+                          checkin="Check In"))
+            response = self.client.post(
+                '/transactions/check-out',
+                data=dict(component='1',
+                          qty='10',
+                          notes="Checking out 10 of em\'",
+                          checkout="Check Out"),
+                follow_redirects=True)
+            self.assertIn(b'Not enough items', response.data)
+
+    def test_checkout_succeeds_availibility_less_quantity(self):
+        with self.client:
+            self.login()
+            self.create_component()
+            self.client.post(
+                '/transactions/check-in',
+                data=dict(component='1',
+                          qty='6',
+                          notes="Checking in 6 of em\'",
+                          checkin="Check In"))
+            response = self.client.post(
+                '/transactions/check-out',
+                data=dict(component='1',
+                          qty='2',
+                          notes="Checking out 6 of em\'",
+                          checkout="Check Out"),
+                follow_redirects=True)
+            self.assertIn(b'Success: Items Checked Out', response.data)
 
     def test_checkin_checkout(self):
         with self.client:
