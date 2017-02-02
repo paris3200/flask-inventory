@@ -33,6 +33,7 @@ class TestInventoryBlueprint(BaseTestCase):
                           website=vendorWebsite),
                 follow_redirects=True)
 
+
     def test_create_vendor_route(self):
         # Ensure register behaves correctly when logged in.
         with self.client:
@@ -86,12 +87,12 @@ class TestInventoryBlueprint(BaseTestCase):
     # component.id should be used instead.
     # In the future, an API can be written at the model class level
     # (SQLAlchemy) in order to create Purchase Orders and other tasks
-    def create_purchase_order(self, sku=1001, quantity=10):
+    def create_purchase_order(self, sku=12345, quantity=10):
         self.login()
         self.create_vendor()
         self.create_component()
         return self.client.post('/purchase_order/create/1',
-                         data=dict(sku=sku, quantity=quantity, total_price=2),
+                         data=dict(sku=sku, quantity=quantity, total_price=2.00),
                          follow_redirects=True)
 
     def test_view_all_vendors(self):
@@ -196,7 +197,7 @@ class TestInventoryBlueprint(BaseTestCase):
 
         widget = Component.query.get(1)
         lineitem = LineItem(component=widget, quantity=10, total_price=10.00)
-        self.assertTrue(lineitem.total_price, 1.00)
+        self.assertEqual(lineitem.total_price, 10.00)
 
     def test_view_purchase_order(self):
         with self.client:
@@ -208,6 +209,7 @@ class TestInventoryBlueprint(BaseTestCase):
             self.assertIn(b'CO', response.data)
             self.assertIn(b'http://www.achme.com', response.data)
             self.assertIn(b'SKU', response.data)
+            self.assertIn(b'Total: 2.00', response.data)
 
     def test_view_purchase_order_all(self):
         with self.client:

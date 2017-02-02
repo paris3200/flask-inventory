@@ -16,12 +16,14 @@ components_tags = db.Table('components_tags',
     db.Column('component_id', db.Integer(), db.ForeignKey('component.id')),
     db.Column('tag_id', db.Integer(), db.ForeignKey('tag.id')))
 
+
 class Base(db.Model):
     __abstract__ = True
-    id              = db.Column(db.Integer, primary_key=True)
-    date_create     = db.Column(db.DateTime, default=db.func.current_timestamp())
-    date_modified   = db.Column(db.DateTime, default=db.func.current_timestamp(),
-                                            onupdate = db.func.current_timestamp()) 
+    id = db.Column(db.Integer, primary_key=True)
+    date_create = db.Column(db.DateTime, default=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime,
+                              default=db.func.current_timestamp(),
+                              onupdate=db.func.current_timestamp())
 
 class User(db.Model):
 
@@ -97,7 +99,7 @@ class PurchaseOrder(db.Model):
     @hybrid_property
     def sub_total(self):
         price = 0
-        for line in self.line_items:
+        for line in self.line_item:
             price += line.total_price
         return price
 
@@ -145,7 +147,7 @@ class Component(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     sku = db.Column(db.String(5), unique=True, nullable=False)
     description = db.Column(db.String(), nullable=False)
-    
+
     tags = db.relationship("Tag", secondary=components_tags, backref='component')
     @hybrid_property
     def qty(self):
