@@ -4,17 +4,16 @@
 import unittest
 
 from tests.base import BaseTestCase
-from project.models import LineItem, Component
+from project.models import LineItem, Component, Vendor
 from project.inventory.forms import VendorCreateForm, PurchaseOrderForm, \
     ComponentCreateForm
 
 
 class TestInventoryBlueprint(BaseTestCase):
 
-
-########################
-### Helper Functions ###
-########################
+    ########################
+    ### Helper Functions ###
+    ########################
 
     def login(self):
 
@@ -56,9 +55,15 @@ class TestInventoryBlueprint(BaseTestCase):
                                           total_price=2.00),
                                 follow_redirects=True)
 
-############
-### Test ###
-############
+#############
+### Tests ###
+#############
+
+    def test_model_print(self):
+        self.login()
+        self.create_vendor()
+        vendor = Vendor.query.filter_by(name='Achme').first()
+        self.assertIn('<Vendor Achme>', vendor.__repr__())
 
     def test_create_vendor_route(self):
         # Ensure register behaves correctly when logged in.
