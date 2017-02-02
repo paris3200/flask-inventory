@@ -11,7 +11,13 @@ from project.inventory.forms import VendorCreateForm, PurchaseOrderForm, \
 
 class TestInventoryBlueprint(BaseTestCase):
 
+
+########################
+### Helper Functions ###
+########################
+
     def login(self):
+
         self.client.post(
             '/login',
             data=dict(email="ad@min.com", password="admin_user"),
@@ -32,6 +38,27 @@ class TestInventoryBlueprint(BaseTestCase):
                       state=vendorState,
                       website=vendorWebsite),
             follow_redirects=True)
+
+    def create_component(self, description="widget"):
+        self.login()
+        return self.client.post(
+            '/component/create',
+            data=dict(sku="12345", description=description),
+            follow_redirects=True)
+
+    def create_purchase_order(self, sku=12345, quantity=10):
+        self.login()
+        self.create_vendor()
+        self.create_component()
+        return self.client.post('/purchase_order/create/1',
+                                data=dict(sku=sku,
+                                          quantity=quantity,
+                                          total_price=2.00),
+                                follow_redirects=True)
+
+############
+### Test ###
+############
 
     def test_create_vendor_route(self):
         # Ensure register behaves correctly when logged in.
@@ -75,27 +102,10 @@ class TestInventoryBlueprint(BaseTestCase):
                                        follow_redirects=True)
             self.assertEqual(response.status_code, 404)
 
-    def create_component(self, description="widget"):
-        self.login()
-        return self.client.post(
-            '/component/create',
-            data=dict(sku="12345", description=description),
-            follow_redirects=True)
-
     # sku is not part of the create purchase_order wtform
     # component.id should be used instead.
     # In the future, an API can be written at the model class level
     # (SQLAlchemy) in order to create Purchase Orders and other tasks
-    def create_purchase_order(self, sku=12345, quantity=10):
-        self.login()
-        self.create_vendor()
-        self.create_component()
-        return self.client.post('/purchase_order/create/1',
-                                data=dict(sku=sku,
-                                          quantity=quantity,
-                                          total_price=2.00),
-                                follow_redirects=True)
-
     def test_view_all_vendors(self):
         with self.client:
             self.login()
