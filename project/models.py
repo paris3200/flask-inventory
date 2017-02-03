@@ -5,16 +5,23 @@ import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql.functions import sum
 
-
 from project import db, bcrypt
 
 tag_categories_tags = db.Table('tag_categories_tags',
-    db.Column('tag_category_id', db.Integer(), db.ForeignKey('tag_category.id')),
-    db.Column('tag_id', db.Integer(), db.ForeignKey('tag.id')))
+                               db.Column('tag_category_id',
+                                         db.Integer(),
+                                         db.ForeignKey('tag_category.id')
+                                         ),
+                               db.Column('tag_id', db.Integer(),
+                                         db.ForeignKey('tag.id')))
 
 components_tags = db.Table('components_tags',
-    db.Column('component_id', db.Integer(), db.ForeignKey('component.id')),
-    db.Column('tag_id', db.Integer(), db.ForeignKey('tag.id')))
+                           db.Column('component_id',
+                                     db.Integer(),
+                                     db.ForeignKey('component.id')),
+                           db.Column('tag_id',
+                                     db.Integer(),
+                                     db.ForeignKey('tag.id')))
 
 
 class Base(db.Model):
@@ -25,6 +32,7 @@ class Base(db.Model):
                               default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
 
+
 class User(db.Model):
 
     __tablename__ = "user"
@@ -34,6 +42,10 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     registered_on = db.Column(db.DateTime, nullable=False)
     admin = db.Column(db.Boolean, nullable=False, default=False)
+    transactions = db.relationship('Transaction', backref='user',
+                                   lazy='joined')
+    purchase_orders = db.relationship('PurchaseOrder', backref='user',
+                                   lazy='joined')
 
     def __init__(self, email, password, admin=False):
         self.email = email
@@ -95,6 +107,8 @@ class PurchaseOrder(db.Model):
                              lazy="joined")
     shipping = db.Column(db.Numeric(12, 2), nullable=False, default=0.00)
     tax = db.Column(db.Numeric(12, 2), nullable=False, default=0.00)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
+                        nullable=False)
 
     @hybrid_property
     def sub_total(self):
@@ -105,10 +119,10 @@ class PurchaseOrder(db.Model):
 
     @hybrid_property
     def total(self):
-        return self.sub_total+self.shipping+self.tax
+        return self.sub_total + self.shipping + self.tax
 
     def as_dict(self):
-       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     def __repr__(self):
         return dir(self)
@@ -147,49 +161,55 @@ class Component(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     sku = db.Column(db.String(5), unique=True, nullable=False)
     description = db.Column(db.String(), nullable=False)
+    tags = db.relationship("Tag",
+                           secondary=components_tags,
+                           backref='component')
 
-    tags = db.relationship("Tag", secondary=components_tags, backref='component')
     @hybrid_property
     def qty(self):
         # the_query = Transaction.filter(Transaction.component_id == self.id)
         # qty_available = the_query.with_entities(sum(Transaction.qty).label('available')).first()
-        qty_available = [ x.qty for x in self.transactions]
+        qty_available = [x.qty for x in self.transactions]
         s = 0
         for i in qty_available:
             s += i
         return s
 
+
 class Transaction(Base):
     __tablename__ = "transaction"
     component_id = db.Column(db.Integer, db.ForeignKey('component.id'),
-                          nullable=False)
+                             nullable=False)
     component = db.relationship("Component", backref="transactions")
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     notes = db.Column(db.String(40))
     qty = db.Column(db.Integer, nullable=False)
+
 
 class TagCategory(db.Model):
     __tablename__ = "tag_category"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(25), unique=True, nullable=False)
 
-    tags = db.relationship("Tag", secondary=tag_categories_tags, backref='categories')
+    tags = db.relationship("Tag",
+                           secondary=tag_categories_tags,
+                           backref='categories')
 
-    def __init__(self,name):
+    def __init__(self, name):
         self.name = name
+
     def __repr__(self):
-        return "Category Name: %s, Tags: %s" % (self.name, str(0) if self.tags==None else ",".join([x.name for x in self.tags]))
+        return "Category Name: %s, Tags: %s" % (self.name, str(
+            0) if self.tags is None else ",".join([x.name for x in self.tags]))
+
 
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(25), unique=True, nullable=False)
 
-    def __init__(self,name):
+    def __init__(self, name):
         self.name = name
 
     def __repr__(self):
-        return "%s in: %s" % (self.name, str(None) if self.categories == None else ",".join([x.name for x in self.categories]))
-
-
-
-
-
+        return "%s in: %s" % (self.name, str(
+            None) if self.categories is None else ",".join([x.name for x in self.categories]))

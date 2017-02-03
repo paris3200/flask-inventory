@@ -144,6 +144,7 @@ $(document).ready(function() {
     {{form.component}}
     {{form.qty.label(style="display:block")}}
     {{form.qty}}
+    {{form.user_id(value=current_user.get_id())}}
     {{form.notes.label(style="display:block")}}
     {{form.notes}}
     {{form[the_action]}}

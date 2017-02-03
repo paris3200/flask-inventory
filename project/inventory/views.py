@@ -180,6 +180,7 @@ def create_purchase_order(vendor_id):
             order = PurchaseOrder()
             order.created_on = datetime.date.today()
             order.vendor = vendor
+            order.user_id = form.user_id.data
             db.session.add(order)
             component = Component.query.filter_by(
                 sku=form.sku.data).first()

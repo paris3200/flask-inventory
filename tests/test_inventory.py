@@ -52,7 +52,8 @@ class TestInventoryBlueprint(BaseTestCase):
         return self.client.post('/purchase_order/create/1',
                                 data=dict(sku=sku,
                                           quantity=quantity,
-                                          total_price=2.00),
+                                          total_price=2.00,
+                                          user_id=1),
                                 follow_redirects=True)
 
 #############
@@ -178,7 +179,8 @@ class TestInventoryBlueprint(BaseTestCase):
             self.assertEqual(response.status_code, 404)
 
     def test_validate_purchase_order_form_data(self):
-        form = PurchaseOrderForm(sku="1001", quantity="10", total_price="2.99")
+        form = PurchaseOrderForm(sku="1001", quantity="10", total_price="2.99",
+                                 user_id="1")
         self.assertTrue(form.validate())
 
     def test_invalid_purchase_order_form(self):
@@ -236,6 +238,7 @@ class TestInventoryBlueprint(BaseTestCase):
             response = self.client.get('/purchase_order/',
                                        follow_redirects=True)
             self.assertIn(b'<h1>Purchase Orders</h1>', response.data)
+            self.assertIn(b'ad@min.com', response.data)
 
     def test_create_purchaseorder_requires_valid_input(self):
         with self.client:
@@ -280,11 +283,13 @@ class TestInventoryBlueprint(BaseTestCase):
                 data=dict(component='1',
                           qty='6',
                           notes="Checking in 6 of em\'",
-                          checkin="Check In"))
+                          checkin="Check In",
+                          user_id="1"))
             response = self.client.get('/transactions/')
             self.assertIn(b'1', response.data)
             self.assertIn(b'6', response.data)
             self.assertIn(b'Checking in 6 of em', response.data)
+            self.assertIn(b'ad@min.com', response.data)
 
     def test_checkout_fails_availibility_exceeds_quantity(self):
         with self.client:
@@ -295,13 +300,15 @@ class TestInventoryBlueprint(BaseTestCase):
                 data=dict(component='1',
                           qty='6',
                           notes="Checking in 6 of em\'",
-                          checkin="Check In"))
+                          checkin="Check In",
+                          user_id="1"))
             response = self.client.post(
                 '/transactions/check-out',
                 data=dict(component='1',
                           qty='10',
                           notes="Checking out 10 of em\'",
-                          checkout="Check Out"),
+                          checkout="Check Out",
+                          user_id="1"),
                 follow_redirects=True)
             self.assertIn(b'Not enough items', response.data)
 
@@ -314,13 +321,15 @@ class TestInventoryBlueprint(BaseTestCase):
                 data=dict(component='1',
                           qty='6',
                           notes="Checking in 6 of em\'",
-                          checkin="Check In"))
+                          checkin="Check In",
+                          user_id="1"))
             response = self.client.post(
                 '/transactions/check-out',
                 data=dict(component='1',
                           qty='2',
                           notes="Checking out 6 of em\'",
-                          checkout="Check Out"),
+                          checkout="Check Out",
+                          user_id="1"),
                 follow_redirects=True)
             self.assertIn(b'Success: Items Checked Out', response.data)
 
@@ -333,7 +342,8 @@ class TestInventoryBlueprint(BaseTestCase):
                 data=dict(component='1',
                           qty='6',
                           notes="Checking in 6 of em\'",
-                          checkin="Check In"),
+                          checkin="Check In",
+                          user_id="1"),
                 follow_redirects=True)
             self.assertIn(b'Items Checked In', response.data)
             response = self.client.post(
@@ -341,7 +351,8 @@ class TestInventoryBlueprint(BaseTestCase):
                 data=dict(component='1',
                           qty='',
                           notes="Checking in 6 of em\'",
-                          checkin="Check In"),
+                          checkin="Check In",
+                          user_id="1"),
                 follow_redirects=True)
             self.assertIn(b'qty', response.data)
             response = self.client.post(
@@ -349,6 +360,7 @@ class TestInventoryBlueprint(BaseTestCase):
                 data=dict(component='1',
                           qty='',
                           notes="Checking out 6 of em\'",
-                          checkout="Check Out"),
+                          checkout="Check Out",
+                          user_id="1"),
                 follow_redirects=True)
             self.assertIn(b'qty', response.data)

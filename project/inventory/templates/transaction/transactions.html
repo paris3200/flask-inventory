@@ -10,16 +10,18 @@
   <table class="table table-striped table-bordered table-hover">
     <tr>
         <th>Item</th>
-        <th>Time</th>
         <th>QTY</th>
         <th>Notes</th>
+        <th>Time</th>
+        <th>User</th>
     </tr>
     {% for c in transactions %}
         <tr>
             <td>{{ c.component.sku }}</td>
-            <td>{{ c.date_create.strftime("%m/%d/%Y %H:%M %P  ") }}</td>
             <td>{{ c.qty }}</td>
             <td>{{ c.notes }}</td>
+            <td>{{ c.date_create.strftime("%m/%d/%Y %H:%M %P  ") }}</td>
+            <td>{{ c.user.email }}</td>
         </tr>
 {% endfor %}
   </table>
