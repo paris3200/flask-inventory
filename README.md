@@ -4,7 +4,7 @@
 
 Flask Inventory is an attempt to create an inventory management system for
 a small business using the flask framework.  Currently the project is under heavy
-development.  
+development and not ready for use.    
 
 
 
@@ -28,19 +28,25 @@ $ export APP_SETTINGS="project.config.DevelopmentConfig"
 
 ### Create DB
 
+Run _setup.sh_ to setup the database and add an admin user.  
+
 ```sh
-$ python manage.py create_db
-$ python manage.py db init
-$ python manage.py db migrate
-$ python manage.py create_admin
-$ python manage.py create_data
+$  ./setup.sh
 ```
 
 ### Run the Application
 
+Start the webserver:
+
 ```sh
 $ python manage.py runserver
 ```
+
+You should then be able to view the application in the brower.  To access the admin section login with:
+
+Username: ad@min.com
+
+Password: admin_user
 
 ### Testing
 

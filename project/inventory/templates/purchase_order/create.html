@@ -14,7 +14,6 @@
   <form class="form" role="form" method="post" action="">
 
     {{ form.csrf_token }}
-    {{ form.hidden_tag() }}
     {{ wtf.form_errors(form, hiddens="only") }}
 
 
@@ -23,6 +22,7 @@
       {{ wtf.form_field(form.sku) }}
       {{ wtf.form_field(form.quantity) }}
       {{ wtf.form_field(form.total_price) }}
+      {{form.user_id(value=current_user.get_id())}}
 
     </div>
     <div>
