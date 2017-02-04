@@ -19,8 +19,6 @@ class SingleTagsAPI(Resource):
 	decorators = [login_required]
 	@marshal_with(tag)
 	def get(self):
-		print(TagCategory.query.all())
-		print(Tag.query.all())
 		return Tag.query.filter(Tag.categories == None).all()
 
 class CategoriesAPI(Resource):

@@ -60,10 +60,10 @@ class TestTagManagement(BaseTestCase):
                           tag_name=new_single_tag,
                           make="OK"),
                 follow_redirects=True)
-            self.assertIn(new_single_tag.strip().upper(), response.data)
+            self.assertIn(str.encode(new_single_tag.strip().upper()), response.data)
             response = self.client.get(
                 '/api/single-tags')
-            self.assertIn(new_single_tag.strip().upper(), response.data)
+            self.assertIn(str.encode(new_single_tag.strip().upper()), response.data)
 
     def test_create_tag_in_category(self):
         with self.client:
@@ -77,7 +77,7 @@ class TestTagManagement(BaseTestCase):
                           tag_name=tag_in_cat,
                           make="OK"),
                 follow_redirects=True)
-            self.assertIn("%s</span>:<span>%s" % (the_cat.strip().upper(), tag_in_cat.strip().upper()), response.data)
+            self.assertIn(b"%s</span>:<span>%s" % (the_cat.strip().upper(), tag_in_cat.strip().upper()), response.data)
             response = self.client.get(
                 '/api/categories')
             the_cat_with_tag = json.loads(response.data)
