@@ -81,7 +81,7 @@ class TestTagManagement(BaseTestCase):
             self.assertIn(str.encode(test_string), response.data)
             response = self.client.get(
                 '/api/categories')
-            the_cat_with_tag = json.loads(str(response.data))
+            the_cat_with_tag = json.loads(response.data.decode("utf-8"))
             self.assertEqual(
                 the_cat_with_tag[0]['tags'][0]['name'],
                 tag_in_cat.strip().upper())
