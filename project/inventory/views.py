@@ -252,9 +252,6 @@ def manage_tags():
         db.session.commit()
     categories = TagCategory.query.all()
     uncategorized_tags = Tag.query.filter(Tag.categories == None).all()
-    print(uncategorized_tags)
-    print(Tag.query.all())
-
     return render_template("/tags/tag-manager.html",
         categories=categories, uncategorized_tags = uncategorized_tags, form=form)
 

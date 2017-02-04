@@ -77,7 +77,8 @@ class TestTagManagement(BaseTestCase):
                           tag_name=tag_in_cat,
                           make="OK"),
                 follow_redirects=True)
-            self.assertIn(b"%s</span>:<span>%s" % (the_cat.strip().upper(), tag_in_cat.strip().upper()), response.data)
+            test_string = "%s</span>:<span>%s" % (the_cat.strip().upper(), tag_in_cat.strip().upper())
+            self.assertIn(str.encode(test_string), response.data)
             response = self.client.get(
                 '/api/categories')
             the_cat_with_tag = json.loads(response.data)
