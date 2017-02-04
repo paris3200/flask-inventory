@@ -212,11 +212,10 @@ def create_component():
                                   description=form.description.data)
             db.session.add(component)
             db.session.commit()
-
             flash('New Component Added', 'success')
             return redirect(url_for('.view_component'))
         else:
-            flash('Component already exist.')
+            flash('Component already exists.')
             return redirect(url_for('.view_component'))
     return render_template('/component/create.html', form=form)
 
@@ -253,9 +252,6 @@ def manage_tags():
         db.session.commit()
     categories = TagCategory.query.all()
     uncategorized_tags = Tag.query.filter(Tag.categories == None).all()
-    print(uncategorized_tags)
-    print(Tag.query.all())
-
     return render_template("/tags/tag-manager.html",
         categories=categories, uncategorized_tags = uncategorized_tags, form=form)
 

@@ -208,7 +208,7 @@ class TestInventoryBlueprint(BaseTestCase):
             self.login()
             self.create_component()
             response = self.create_component("widget")
-            self.assertIn(b'Component already exist.', response.data)
+            self.assertIn(b'Component already exists', response.data)
 
     def test_lineitem_total(self):
         with self.client:
