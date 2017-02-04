@@ -7,6 +7,7 @@ tag = {
 item = {
 	'id': fields.String,
 	'sku' : fields.String,
+	'qty' : fields.String,
 	'description' : fields.String,
 	'tags' : fields.Nested(tag),
 }

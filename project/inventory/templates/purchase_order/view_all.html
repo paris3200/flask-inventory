@@ -11,13 +11,15 @@
     <tr>
         <th>Order Id</th>
         <th>Vendor Name</th>
-        <th>Created on</th>
+        <th>Created On</th>
+        <th>Created By</th>
     </tr>
     {% for purchase_order in result %}
         <tr>
             <td><a href="{{ url_for('inventory.view_purchase_order', po_id=purchase_order.id) }}">{{ purchase_order.id }}</a></td>
             <td><a href="{{ url_for('inventory.view_vendor', vendor_id=purchase_order.vendor.id) }}">{{ purchase_order.vendor.name }}</a></td>
             <td>{{ purchase_order.created_on }}</td>
+            <td>{{ purchase_order.user.email }}</td>
         </tr>
 {% endfor %}
   </table>

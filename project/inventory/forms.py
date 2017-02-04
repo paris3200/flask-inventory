@@ -2,9 +2,11 @@
 
 
 from flask_wtf import Form
-from wtforms import TextField, SelectField, IntegerField, SubmitField
+
+from wtforms import TextField, SelectField, IntegerField, SubmitField, HiddenField
 from wtforms.validators import DataRequired, URL, Optional, ValidationError
 from ..models import Component
+
 
 STATE_ABBREV = ('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
                 'HI', 'ID', 'IL', 'IN', 'IO', 'KS', 'KY', 'LA', 'ME', 'MD',
@@ -42,16 +44,19 @@ class PurchaseOrderForm(Form):
     sku = TextField("SKU", validators=[DataRequired()])
     quantity = IntegerField('Quantity', validators=[DataRequired()])
     total_price = TextField('Total Item  Price', validators=[DataRequired()])
+    user_id = HiddenField('user_id', validators=[DataRequired()])
 
 
 class ComponentCreateForm(Form):
     sku = TextField('Sku', validators=[DataRequired(),UniqueSku()])
     description = TextField('Description', validators=[DataRequired()])
 
+
 class TransactionForm(Form):
     component = SelectField("Item", validators=[DataRequired()], coerce=int)
     qty = IntegerField('Quantity', validators=[DataRequired()])
-    notes  = TextField('Notes', validators=[DataRequired()])
+    notes = TextField('Notes', validators=[DataRequired()])
+    user_id = HiddenField('user_id', validators=[DataRequired()])
     checkin = SubmitField("Check In")
     checkout = SubmitField("Check Out")
 

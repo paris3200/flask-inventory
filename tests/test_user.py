@@ -13,14 +13,23 @@ from project.user.forms import LoginForm
 
 class TestUserBlueprint(BaseTestCase):
 
+    def login(self):
+        return self.client.post(
+            '/login',
+            data=dict(email="ad@min.com", password="admin_user"),
+            follow_redirects=True
+        )
+
+    def test_model_print(self):
+        # Test model __repr__() is correct.
+        self.login()
+        user = User.query.filter_by(email='ad@min.com').first()
+        self.assertIn('<User ad@min.com>', user.__repr__())
+
     def test_correct_login(self):
         # Ensure login behaves correctly with correct credentials.
         with self.client:
-            response = self.client.post(
-                '/login',
-                data=dict(email="ad@min.com", password="admin_user"),
-                follow_redirects=True
-            )
+            response = self.login()
             self.assertIn(b'Welcome', response.data)
             self.assertIn(b'Logout', response.data)
             self.assertTrue(current_user.email == "ad@min.com")
@@ -30,11 +39,7 @@ class TestUserBlueprint(BaseTestCase):
     def test_logout_behaves_correctly(self):
         # Ensure logout behaves correctly - regarding the session.
         with self.client:
-            self.client.post(
-                '/login',
-                data=dict(email="ad@min.com", password="admin_user"),
-                follow_redirects=True
-            )
+            self.login()
             response = self.client.get('/logout', follow_redirects=True)
             self.assertIn(b'You were logged out. Bye!', response.data)
             self.assertFalse(current_user.is_active())
@@ -62,24 +67,23 @@ class TestUserBlueprint(BaseTestCase):
     def test_get_by_id(self):
         # Ensure id is correct for the current/logged in user.
         with self.client:
-            self.client.post('/login', data=dict(
-                email='ad@min.com', password='admin_user'
-            ), follow_redirects=True)
+            self.login()
             self.assertTrue(current_user.id == 1)
 
     def test_registered_on_defaults_to_datetime(self):
         # Ensure that registered_on is a datetime.
         with self.client:
-            self.client.post('/login', data=dict(
-                email='ad@min.com', password='admin_user'
-            ), follow_redirects=True)
+            self.login()
             user = User.query.filter_by(email='ad@min.com').first()
             self.assertIsInstance(user.registered_on, datetime.datetime)
 
     def test_check_password(self):
         # Ensure given password is correct after unhashing.
         user = User.query.filter_by(email='ad@min.com').first()
-        self.assertTrue(bcrypt.check_password_hash(user.password, 'admin_user'))
+        self.assertTrue(
+            bcrypt.check_password_hash(
+                user.password,
+                'admin_user'))
         self.assertFalse(bcrypt.check_password_hash(user.password, 'foobar'))
 
     def test_validate_invalid_password(self):

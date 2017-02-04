@@ -4,14 +4,19 @@
 import unittest
 
 from tests.base import BaseTestCase
-from project.models import LineItem, Component
+from project.models import LineItem, Component, Vendor
 from project.inventory.forms import VendorCreateForm, PurchaseOrderForm, \
     ComponentCreateForm
 
 
 class TestInventoryBlueprint(BaseTestCase):
 
+    ########################
+    ### Helper Functions ###
+    ########################
+
     def login(self):
+
         self.client.post(
             '/login',
             data=dict(email="ad@min.com", password="admin_user"),
@@ -19,19 +24,47 @@ class TestInventoryBlueprint(BaseTestCase):
         )
 
     def create_vendor(self, vendorName="Achme",
-                        vendoraddress="123 Coyote Ln",
-                        vendorcity="Desert Plain",
-                        vendorState="CO",
-                        vendorWebsite="http://www.achme.com"):
-            self.login()
-            return self.client.post(
-                '/vendor/create',
-                data=dict(name=vendorName,
-                          line1=vendoraddress,
-                          city=vendorcity,
-                          state=vendorState,
-                          website=vendorWebsite),
-                follow_redirects=True)
+                      vendoraddress="123 Coyote Ln",
+                      vendorcity="Desert Plain",
+                      vendorState="CO",
+                      vendorWebsite="http://www.achme.com"):
+        self.login()
+        return self.client.post(
+            '/vendor/create',
+            data=dict(name=vendorName,
+                      line1=vendoraddress,
+                      city=vendorcity,
+                      state=vendorState,
+                      website=vendorWebsite),
+            follow_redirects=True)
+
+    def create_component(self, description="widget"):
+        self.login()
+        return self.client.post(
+            '/component/create',
+            data=dict(sku="12345", description=description),
+            follow_redirects=True)
+
+    def create_purchase_order(self, sku=12345, quantity=10):
+        self.login()
+        self.create_vendor()
+        self.create_component()
+        return self.client.post('/purchase_order/create/1',
+                                data=dict(sku=sku,
+                                          quantity=quantity,
+                                          total_price=2.00,
+                                          user_id=1),
+                                follow_redirects=True)
+
+#############
+### Tests ###
+#############
+
+    def test_model_print(self):
+        self.login()
+        self.create_vendor()
+        vendor = Vendor.query.filter_by(name='Achme').first()
+        self.assertIn('<Vendor Achme>', vendor.__repr__())
 
     def test_create_vendor_route(self):
         # Ensure register behaves correctly when logged in.
@@ -64,7 +97,7 @@ class TestInventoryBlueprint(BaseTestCase):
         with self.client:
             self.login()
             self.create_vendor()
-            response=self.create_vendor()
+            response = self.create_vendor()
         self.assertIn(b'Vendor already exist.', response.data)
         self.assertEqual(response.status_code, 200)
 
@@ -75,25 +108,10 @@ class TestInventoryBlueprint(BaseTestCase):
                                        follow_redirects=True)
             self.assertEqual(response.status_code, 404)
 
-    def create_component(self, description="widget"):
-        self.login()
-        return self.client.post(
-            '/component/create',
-            data=dict(sku="12345", description=description),
-            follow_redirects=True)
-
     # sku is not part of the create purchase_order wtform
     # component.id should be used instead.
     # In the future, an API can be written at the model class level
     # (SQLAlchemy) in order to create Purchase Orders and other tasks
-    def create_purchase_order(self, sku=1001, quantity=10):
-        self.login()
-        self.create_vendor()
-        self.create_component()
-        return self.client.post('/purchase_order/create/1',
-                         data=dict(sku=sku, quantity=quantity, total_price=2),
-                         follow_redirects=True)
-
     def test_view_all_vendors(self):
         with self.client:
             self.login()
@@ -124,11 +142,13 @@ class TestInventoryBlueprint(BaseTestCase):
         with self.client:
             self.login()
             self.create_vendor()
-            response = self.client.post('/vendor/edit/1',
-                                    data=dict(name="Achme LLC",
-                                              state="NC",
-                                              website="http://www.achme.com"),
-                                    follow_redirects=True)
+            response = self.client.post(
+                '/vendor/edit/1',
+                data=dict(
+                    name="Achme LLC",
+                    state="NC",
+                    website="http://www.achme.com"),
+                follow_redirects=True)
         self.assertIn(b'<h1>Vendors</h1>\n', response.data)
         self.assertIn(b'Achme LLC', response.data)
 
@@ -143,12 +163,12 @@ class TestInventoryBlueprint(BaseTestCase):
         self.assertIn(b'Please log in to access this page', response.data)
 
     def test_validate_registration_form(self):
-        form  = VendorCreateForm(name="Achme",
-                        contact="", phone="",
-                        website="http://www.achme.com",
-                        line1="", line2="",
-                        city="", state="NC",
-                        zipcode="")
+        form = VendorCreateForm(name="Achme",
+                                contact="", phone="",
+                                website="http://www.achme.com",
+                                line1="", line2="",
+                                city="", state="NC",
+                                zipcode="")
         self.assertTrue(form.validate())
 
     def test_view_purchase_order_404_with_unknown_id(self):
@@ -159,7 +179,8 @@ class TestInventoryBlueprint(BaseTestCase):
             self.assertEqual(response.status_code, 404)
 
     def test_validate_purchase_order_form_data(self):
-        form = PurchaseOrderForm(sku="1001", quantity="10", total_price="2.99")
+        form = PurchaseOrderForm(sku="1001", quantity="10", total_price="2.99",
+                                 user_id="1")
         self.assertTrue(form.validate())
 
     def test_invalid_purchase_order_form(self):
@@ -196,7 +217,7 @@ class TestInventoryBlueprint(BaseTestCase):
 
         widget = Component.query.get(1)
         lineitem = LineItem(component=widget, quantity=10, total_price=10.00)
-        self.assertTrue(lineitem.total_price, 1.00)
+        self.assertEqual(lineitem.total_price, 10.00)
 
     def test_view_purchase_order(self):
         with self.client:
@@ -208,6 +229,7 @@ class TestInventoryBlueprint(BaseTestCase):
             self.assertIn(b'CO', response.data)
             self.assertIn(b'http://www.achme.com', response.data)
             self.assertIn(b'SKU', response.data)
+            self.assertIn(b'Total: 2.00', response.data)
 
     def test_view_purchase_order_all(self):
         with self.client:
@@ -216,6 +238,7 @@ class TestInventoryBlueprint(BaseTestCase):
             response = self.client.get('/purchase_order/',
                                        follow_redirects=True)
             self.assertIn(b'<h1>Purchase Orders</h1>', response.data)
+            self.assertIn(b'ad@min.com', response.data)
 
     def test_create_purchaseorder_requires_valid_input(self):
         with self.client:
@@ -251,6 +274,65 @@ class TestInventoryBlueprint(BaseTestCase):
             self.assertIn(b'has been tagged with', response.data)
             self.assertIn(b'WEST COAST', response.data)
 
+    def test_checkin_updates_transactions(self):
+        with self.client:
+            self.login()
+            self.create_component()
+            self.client.post(
+                '/transactions/check-in',
+                data=dict(component='1',
+                          qty='6',
+                          notes="Checking in 6 of em\'",
+                          checkin="Check In",
+                          user_id="1"))
+            response = self.client.get('/transactions/')
+            self.assertIn(b'1', response.data)
+            self.assertIn(b'6', response.data)
+            self.assertIn(b'Checking in 6 of em', response.data)
+            self.assertIn(b'ad@min.com', response.data)
+
+    def test_checkout_fails_availibility_exceeds_quantity(self):
+        with self.client:
+            self.login()
+            self.create_component()
+            self.client.post(
+                '/transactions/check-in',
+                data=dict(component='1',
+                          qty='6',
+                          notes="Checking in 6 of em\'",
+                          checkin="Check In",
+                          user_id="1"))
+            response = self.client.post(
+                '/transactions/check-out',
+                data=dict(component='1',
+                          qty='10',
+                          notes="Checking out 10 of em\'",
+                          checkout="Check Out",
+                          user_id="1"),
+                follow_redirects=True)
+            self.assertIn(b'Not enough items', response.data)
+
+    def test_checkout_succeeds_availibility_less_quantity(self):
+        with self.client:
+            self.login()
+            self.create_component()
+            self.client.post(
+                '/transactions/check-in',
+                data=dict(component='1',
+                          qty='6',
+                          notes="Checking in 6 of em\'",
+                          checkin="Check In",
+                          user_id="1"))
+            response = self.client.post(
+                '/transactions/check-out',
+                data=dict(component='1',
+                          qty='2',
+                          notes="Checking out 6 of em\'",
+                          checkout="Check Out",
+                          user_id="1"),
+                follow_redirects=True)
+            self.assertIn(b'Success: Items Checked Out', response.data)
+
     def test_checkin_checkout(self):
         with self.client:
             self.login()
@@ -260,7 +342,8 @@ class TestInventoryBlueprint(BaseTestCase):
                 data=dict(component='1',
                           qty='6',
                           notes="Checking in 6 of em\'",
-                          checkin="Check In"),
+                          checkin="Check In",
+                          user_id="1"),
                 follow_redirects=True)
             self.assertIn(b'Items Checked In', response.data)
             response = self.client.post(
@@ -268,7 +351,8 @@ class TestInventoryBlueprint(BaseTestCase):
                 data=dict(component='1',
                           qty='',
                           notes="Checking in 6 of em\'",
-                          checkin="Check In"),
+                          checkin="Check In",
+                          user_id="1"),
                 follow_redirects=True)
             self.assertIn(b'qty', response.data)
             response = self.client.post(
@@ -276,7 +360,7 @@ class TestInventoryBlueprint(BaseTestCase):
                 data=dict(component='1',
                           qty='',
                           notes="Checking out 6 of em\'",
-                          checkout="Check Out"),
+                          checkout="Check Out",
+                          user_id="1"),
                 follow_redirects=True)
             self.assertIn(b'qty', response.data)
-
