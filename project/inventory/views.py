@@ -211,11 +211,10 @@ def create_component():
                                   description=form.description.data)
             db.session.add(component)
             db.session.commit()
-
             flash('New Component Added', 'success')
             return redirect(url_for('.view_component'))
         else:
-            flash('Component already exist.')
+            flash('Component already exists.')
             return redirect(url_for('.view_component'))
     return render_template('/component/create.html', form=form)
 

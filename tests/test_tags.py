@@ -80,9 +80,7 @@ class TestTagManagement(BaseTestCase):
             self.assertIn("%s</span>:<span>%s" % (the_cat.strip().upper(), tag_in_cat.strip().upper()), response.data)
             response = self.client.get(
                 '/api/categories')
-            print 'the json'
             the_cat_with_tag = json.loads(response.data)
-            print the_cat_with_tag
             self.assertEqual(
                 the_cat_with_tag[0]['tags'][0]['name'],
                 tag_in_cat.strip().upper())
