@@ -4,6 +4,7 @@
 from flask_wtf import Form
 from wtforms import TextField, SelectField, IntegerField, SubmitField
 from wtforms.validators import DataRequired, URL, Optional, ValidationError
+from ..models import Component
 
 STATE_ABBREV = ('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
                 'HI', 'ID', 'IL', 'IN', 'IO', 'KS', 'KY', 'LA', 'ME', 'MD',
@@ -14,7 +15,7 @@ STATE_ABBREV = ('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
 class UniqueSku(object):
     def __init__(self, message=None):
         if not message:
-            message = 'Sku must be unique. Component with this Sku already exists'
+            message = 'Sku must be unique. Component already exists with same Sku.'
         self.message = message
     def __call__(self, form, field):
         if Component.query.filter_by(sku=field.data).first():
