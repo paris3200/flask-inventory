@@ -219,6 +219,14 @@ class TestInventoryBlueprint(BaseTestCase):
             response = self.create_vendor_component()
             self.assertIn(b'Component already exists', response.data)
 
+    def test_view_all_vendor_component(self):
+        with self.client:
+            self.login()
+            self.create_vendor()
+            self.create_vendor_component()
+            response = self.client.get('/vendor/1/component/', follow_redirects=True)
+            self.assertIn(b'Vendor Components', response.data)
+
     def test_create_component_database_insert(self):
         with self.client:
             self.login()

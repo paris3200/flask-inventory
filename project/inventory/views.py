@@ -235,16 +235,11 @@ def create_vendor_component(vendor_id):
     return render_template('/vendor_component/create.html', form=form)
 
 
-@inventory_blueprint.route('/vendor/<int:vendor_id>/component/ \
-                           <int:component_id>', methods=['GET'])
 @inventory_blueprint.route('/vendor/<int:vendor_id>/component/',
                            methods=['GET'])
 @login_required
 def view_vendor_component(vendor_id, component_id=None):
     vendor = Vendor.query.get_or_404(vendor_id)
-    if component_id:
-        component = VendorComponent.query.get_or_404(component_id)
-        return render_template('vendor_component/view.html', result=component)
     component = VendorComponent.query.filter_by(vendor=vendor)
     return render_template('/vendor_component/view_all.html', result=component)
 
