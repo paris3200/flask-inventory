@@ -4,7 +4,7 @@
 import unittest
 
 from tests.base import BaseTestCase
-from project.models import LineItem, Component, Vendor
+from project.models import LineItem, Component, Vendor, VendorComponent
 from project.inventory.forms import VendorCreateForm, PurchaseOrderForm, \
     ComponentCreateForm
 
@@ -45,10 +45,17 @@ class TestInventoryBlueprint(BaseTestCase):
             data=dict(sku="12345", description=description),
             follow_redirects=True)
 
+    def create_vendor_component(self, description="widget"):
+        self.login()
+        return self.client.post(
+            'vendor/1/component/create',
+            data=dict(sku="12345", description=description, vendor_id=1),
+            follow_redirects=True)
+
     def create_purchase_order(self, sku=12345, quantity=10):
         self.login()
         self.create_vendor()
-        self.create_component()
+        self.create_vendor_component()
         return self.client.post('/purchase_order/create/1',
                                 data=dict(sku=sku,
                                           quantity=quantity,
@@ -195,6 +202,23 @@ class TestInventoryBlueprint(BaseTestCase):
         form = PurchaseOrderForm(name=False)
         self.assertFalse(form.validate())
 
+    def test_create_vendor_component_database_insert(self):
+        with self.client:
+            self.login()
+            self.create_vendor()
+            self.create_vendor_component()
+            response = self.client.get('/vendor/1/component/', follow_redirects=True)
+            self.assertIn(b'<h1>Vendor Components</h1>', response.data)
+            self.assertIn(b'widget', response.data)
+
+    def test_create_vendor_component_exist_error(self):
+        with self.client:
+            self.login()
+            self.create_vendor()
+            self.create_vendor_component()
+            response = self.create_vendor_component()
+            self.assertIn(b'Component already exists', response.data)
+
     def test_create_component_database_insert(self):
         with self.client:
             self.login()
@@ -213,10 +237,10 @@ class TestInventoryBlueprint(BaseTestCase):
     def test_lineitem_total(self):
         with self.client:
             self.login()
-            self.create_component()
+            self.create_vendor_component()
 
-        widget = Component.query.get(1)
-        lineitem = LineItem(component=widget, quantity=10, total_price=10.00)
+        widget = VendorComponent.query.get(1)
+        lineitem = LineItem(vendor_component=widget, quantity=10, total_price=10.00)
         self.assertEqual(lineitem.total_price, 10.00)
 
     def test_view_purchase_order(self):

@@ -1,0 +1,70 @@
+{% extends '_base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+
+  <header class="content-header">
+    <h1>Component</h1>
+  </header>
+
+  <table class="table table-striped table-bordered table-hover">
+    <tr>
+        <th>Sku</th>
+        <th>Description</th>
+    </tr>
+        <tr>
+            <td>{{ result.sku }}</td>
+            <td>{{result.description }}</td>
+        </tr>
+      <tr>
+        <td colspan="2">
+          <span style="">tags:</span>
+        <ul class="list-unstyled list-inline">
+          {% for t in result.tags %}
+            <li class="component-tag">{{t.name}}</li>
+          {% else %}
+            <li><i>Has not been tagged</i></li>
+          {% endfor %}
+          </ul>
+        </td>
+      </tr>
+  </table>
+  <h3>Tag</h3>
+  <form method="POST" action="">
+    <div class="form-group">
+      {{form.category.label}}
+      {{form.category(class="form-control")}}
+    </div>
+    <div class="form-group">
+      {{form.tag_name.label}}
+      {{form.tag_name(class="form-control")}}
+    </div>
+    <div class="form-group">
+      {{form.make(class="btn btn-primary")}}
+    </div>
+  </form>
+  <table>
+    <tr><td style="padding-right:20px;">
+  <i>Available Categories:</i>
+    <ul class="list-unstyled">
+    {% for c in categories %}
+     <li class="existing-category">{{c.name}}</li>
+     {% else %}
+     <li class=""><i>None</i></li>
+    {% endfor %}
+    </ul>
+    </td>
+    <td>
+  <i>Available Tags:</i>
+    <ul class="list-unstyled">
+    {% for t in tags %}
+     <li class="existing-category">{{t.name}}</li>
+     {% else %}
+     <li class=""><i>None</i></li>
+    {% endfor %}
+    </ul>
+    </td>
+  </tr>
+  </table>
+
+{% endblock %}

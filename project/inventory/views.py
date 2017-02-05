@@ -12,8 +12,8 @@ from flask.views import View
 from flask_login import login_required
 
 from project import db
-from project.models import Vendor, PurchaseOrder, LineItem, Component, Address, \
-    Transaction, TagCategory, Tag
+from project.models import Vendor, PurchaseOrder, LineItem, Component, Address,\
+    Transaction, TagCategory, Tag, VendorComponent
 from project.inventory.forms import VendorCreateForm, PurchaseOrderForm, \
     ComponentCreateForm, TransactionForm, TagForm
 
@@ -28,11 +28,15 @@ inventory_blueprint = Blueprint('inventory',
 ################
 #    views     #
 ################
+
+
 class TransactionMakerView(View):
-    methods = ["GET","POST"]
+    methods = ["GET", "POST"]
     decorators = [login_required]
+
     def __init__(self, action_type):
         self.action_type = action_type
+
     def get_template_name(self):
         return '/transaction/make.html'
 
@@ -41,7 +45,8 @@ class TransactionMakerView(View):
 
     def dispatch_request(self):
         form = TransactionForm(request.form)
-        form.component.choices = [(x.id, x.description) for x in Component.query.all()]
+        form.component.choices = [(x.id, x.description)
+                                  for x in Component.query.all()]
         if form.validate_on_submit():
             nt = Transaction()
             form.component.data = Component.query.get(form.component.data)
@@ -54,35 +59,40 @@ class TransactionMakerView(View):
                     db.session.commit()
                     flash('Success: Items Checked Out')
                 else:
-                    flash("Not enough items, only %s available" % (form.component.data.qty))
+                    flash("Not enough items, only %s available" %
+                          (form.component.data.qty))
                     form.component.data = form.component.data.id
-                    return render_template("/transaction/make.html", form=form, the_action=self.action_type)
+                    return render_template("/transaction/make.html",
+                                           form=form,
+                                           the_action=self.action_type)
             elif form.checkin.data:
                 nt.qty = form.qty.data
                 db.session.add(nt)
                 db.session.commit()
-                flash('Success: %s Checked In' % ("Items" if nt.qty > 1 else "Item"))
+                flash('Success: %s Checked In' %
+                      ("Items" if nt.qty > 1 else "Item"))
             return redirect(url_for('main.home'))
-        return render_template("/transaction/make.html", form=form, the_action=self.action_type)
-
-
+        return render_template("/transaction/make.html",
+                               form=form, the_action=self.action_type)
 
 
 ################
 #    routes    #
 ################
-
 @inventory_blueprint.route('/transactions/', methods=['GET'])
 @login_required
 def transactions():
     transactions = Transaction.query.all()
-    return render_template("/transaction/transactions.html", transactions=transactions)
+    return render_template("/transaction/transactions.html",
+                           transactions=transactions)
 
 
-inventory_blueprint.add_url_rule('/transactions/check-in', view_func=TransactionMakerView.as_view(
-    'checkin', action_type='checkin'))
-inventory_blueprint.add_url_rule('/transactions/check-out', view_func=TransactionMakerView.as_view(
-    'checkout', action_type='checkout'))
+inventory_blueprint.add_url_rule(
+    '/transactions/check-in',
+    view_func=TransactionMakerView.as_view('checkin', action_type='checkin'))
+inventory_blueprint.add_url_rule(
+    '/transactions/check-out',
+    view_func=TransactionMakerView.as_view('checkout', action_type='checkout'))
 
 
 ################
@@ -182,10 +192,10 @@ def create_purchase_order(vendor_id):
             order.vendor = vendor
             order.user_id = form.user_id.data
             db.session.add(order)
-            component = Component.query.filter_by(
+            component = VendorComponent.query.filter_by(
                 sku=form.sku.data).first()
             if component:
-                line1 = LineItem(component=component,
+                line1 = LineItem(vendor_component=component,
                                  quantity=form.quantity.data,
                                  total_price=form.total_price.data)
                 order.line_item.append(line1)
@@ -199,6 +209,44 @@ def create_purchase_order(vendor_id):
         return redirect(url_for('.view_purchase_order', po_id=order.id))
     return render_template('/purchase_order/create.html', form=form,
                            vendor=vendor)
+
+
+@inventory_blueprint.route('/vendor/<int:vendor_id>/component/create',
+                           methods=['GET', 'POST'])
+@login_required
+def create_vendor_component(vendor_id):
+    vendor = Vendor.query.get_or_404(vendor_id)
+    form = ComponentCreateForm()
+    if form.validate_on_submit():
+        component = VendorComponent.query.filter_by(sku=form.sku.data).first()
+        if component is None:
+            component = VendorComponent(sku=form.sku.data,
+                                        description=form.description.data,
+                                        vendor=vendor)
+            db.session.add(component)
+            db.session.commit()
+            flash('New Component Added', 'success')
+            return redirect(url_for('.view_vendor_component',
+                                    vendor_id=vendor_id))
+        else:
+            flash('Component already exists.')
+            return redirect(url_for('.create_vendor_component',
+                                    vendor_id=vendor_id))
+    return render_template('/vendor_component/create.html', form=form)
+
+
+@inventory_blueprint.route('/vendor/<int:vendor_id>/component/ \
+                           <int:component_id>', methods=['GET'])
+@inventory_blueprint.route('/vendor/<int:vendor_id>/component/',
+                           methods=['GET'])
+@login_required
+def view_vendor_component(vendor_id, component_id=None):
+    vendor = Vendor.query.get_or_404(vendor_id)
+    if component_id:
+        component = VendorComponent.query.get_or_404(component_id)
+        return render_template('vendor_component/view.html', result=component)
+    component = VendorComponent.query.filter_by(vendor=vendor)
+    return render_template('/vendor_component/view_all.html', result=component)
 
 
 @inventory_blueprint.route('/component/create', methods=['GET', 'POST'])
@@ -230,7 +278,8 @@ def view_component(component_id=None):
     component = Component.query.all()
     return render_template('/component/view_all.html', result=component)
 
-@inventory_blueprint.route('/manage-tags', methods=['GET','POST'])
+
+@inventory_blueprint.route('/manage-tags', methods=['GET', 'POST'])
 def manage_tags():
     form = TagForm(request.form)
     if form.validate_on_submit():
@@ -251,11 +300,15 @@ def manage_tags():
             cat_obj.tags.append(tag_obj)
         db.session.commit()
     categories = TagCategory.query.all()
-    uncategorized_tags = Tag.query.filter(Tag.categories == None).all()
+    uncategorized_tags = Tag.query.filter(Tag.categories is None).all()
     return render_template("/tags/tag-manager.html",
-        categories=categories, uncategorized_tags = uncategorized_tags, form=form)
+                           categories=categories,
+                           uncategorized_tags=uncategorized_tags,
+                           form=form)
 
-@inventory_blueprint.route('/tag-component/<int:component_id>', methods=['GET', 'POST'])
+
+@inventory_blueprint.route('/tag-component/<int:component_id>',
+                           methods=['GET', 'POST'])
 def tag_component(component_id=None):
     form = TagForm(request.form)
     the_component = Component.query.get_or_404(component_id)
@@ -276,9 +329,12 @@ def tag_component(component_id=None):
         if tag_obj not in the_component.tags:
             the_component.tags.append(tag_obj)
         db.session.commit()
-        flash("%s (%s) has been tagged with %s" % (the_component.description, the_component.sku, tag_obj.name))
-        return redirect(url_for('inventory.view_component', component_id=component_id))
+        flash("%s (%s) has been tagged with %s" %
+              (the_component.description, the_component.sku, tag_obj.name))
+        return redirect(url_for('inventory.view_component',
+                                component_id=component_id))
     categories = TagCategory.query.all()
     tags = Tag.query.all()
-    return render_template("/component/tag-component.html", result=the_component, form=form,
-        categories=categories, tags=tags)
+    return render_template("/component/tag-component.html",
+                           result=the_component, form=form,
+                           categories=categories, tags=tags)

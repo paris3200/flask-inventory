@@ -2,8 +2,10 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block content %}
+<div align="center">
+    <h1>{{ vendor.name }}</h1><br>
+</div>
 <div>
-    {{ vendor.name }}<br>
     {{ vendor.address.line1}}<br>
     {% if vendor.address.line2 %}
         {{ vendor.address.line2 }}<br>
@@ -19,6 +21,12 @@
     {% if vendor.phone %}
         {{ vendor.phone }}<br>
     {% endif %}
+</div>
+<div>
+    <br>
+    <ul>
+        <li><a href="{{ url_for('inventory.view_vendor_component', vendor_id=vendor.id) }}">View Vendor Components</a></li>
+        <li><a href="{{ url_for('inventory.create_vendor_component', vendor_id=vendor.id) }}">Create Vendor Components</a></li>
 </div>
 <div>
     <h4 class="text-center">Purchase Orders</h4>

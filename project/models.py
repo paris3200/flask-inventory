@@ -128,6 +128,27 @@ class PurchaseOrder(db.Model):
         return dir(self)
 
 
+class VendorComponent(db.Model):
+    __tablename__ = "vendor_component"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    sku = db.Column(db.String(5), unique=False, nullable=False)
+    description = db.Column(db.String(), nullable=False)
+    vendor =  db.relationship("Vendor", backref='vendor',
+                                     lazy="joined")
+    vendor_id = db.Column(db.Integer, db.ForeignKey('vendor.id'),
+                          nullable=False)
+
+    @hybrid_property
+    def qty(self):
+        # the_query = Transaction.filter(Transaction.component_id == self.id)
+        # qty_available = the_query.with_entities(sum(Transaction.qty).label('available')).first()
+        qty_available = [x.qty for x in self.transactions]
+        s = 0
+        for i in qty_available:
+            s += i
+        return s
+
 class LineItem(db.Model):
     __tablename__ = "line_item"
 
@@ -139,13 +160,13 @@ class LineItem(db.Model):
                                   db.ForeignKey('purchase_order.id'),
                                   nullable=False)
 
-    component_id = db.Column(db.Integer,
-                             db.ForeignKey('component.id'),
+    vendor_component_id= db.Column(db.Integer,
+                             db.ForeignKey('vendor_component.id'),
                              nullable=False)
 
     purchase_order = db.relationship("PurchaseOrder", backref='line_item',
                                      lazy="joined")
-    component = db.relationship("Component", uselist=False)
+    vendor_component = db.relationship("VendorComponent", uselist=False)
 
     @hybrid_property
     def unit_price(self):
