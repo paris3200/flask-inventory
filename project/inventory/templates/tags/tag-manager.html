@@ -24,6 +24,7 @@
 
   <h3>Create A New Tag</h3><i>click on any tag/category above to populate fields below</i>
   <form method="POST" action="">
+    {{ form.csrf_token }}
     <div class="form-group">
       {{form.category.label}}
       {{form.category(class="form-control")}}

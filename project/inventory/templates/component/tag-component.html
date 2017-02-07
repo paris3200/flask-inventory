@@ -31,6 +31,7 @@
   </table>
   <h3>Tag</h3>
   <form method="POST" action="">
+    {{ form.csrf_token }}
     <div class="form-group">
       {{form.category.label}}
       {{form.category(class="form-control")}}
