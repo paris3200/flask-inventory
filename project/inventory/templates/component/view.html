@@ -1,20 +1,81 @@
 {% extends '_base.html' %}
 {% import "bootstrap/wtf.html" as wtf %}
 
+{% block js %}
+{{ super() }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.10/vue.min.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/vue.resource/1.1.0/vue-resource.min.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.0.3/vue-resource.min.js"></script>
+<script>
+$(document).ready(function() {
+  var app = new Vue({
+    el : '#component-app',
+    data : {
+      result : {},
+      edit: false,
+    },
+    created : function() {
+      this.getComponent();
+    },
+    methods : {
+      getComponent : function() {
+        this.$http.get('/api/components/{{result.id}}').then(response => {
+          this.result = response.body;
+        }, response => {
+          console.log('error getting component');
+        })
+      },
+      updateComponent : function() {
+        this.$http.put('/api/components/{{result.id}}',
+          {sku:this.result.sku, description:this.result.description}).then(response => {
+          this.result = response.body;
+          this.edit=false;
+        }, response => {
+          console.log('error updating component');
+        })
+      },
+    },
+    computed: {
+    }
+  });
+});
+</script>
+
+
+{% endblock %}
+
+
 {% block content %}
 
   <header class="content-header">
     <h1>Component</h1>
   </header>
-
+  <div id="component-app">
+    <div class="hidden" id="html-returned-sku">{{result.sku}}</div>
+    <div class="hidden" id="html-returned-description">{{result.description}}</div>
   <table class="table table-striped table-bordered table-hover">
     <tr>
         <th>Sku</th>
         <th>Description</th>
     </tr>
         <tr>
-            <td>{{ result.sku }}</td>
-            <td>{{result.description }}</td>
+            {% raw %}
+            <td><span v-if="this.edit == false" v-model="result.sku">
+                    {{ result.sku }}
+                  </span>
+                  <input v-else type="text" v-model="result.sku">
+            </td>
+            <td><span v-if="this.edit == false" v-model="result.description">
+                    {{result.description }}
+                  </span>
+                  <input v-else type="text" v-model="result.description">
+            </td>
+            <td>
+              <a class="btn btn-default" v-if="this.edit == false" href="#" v-on:click="edit = !edit">Edit</a>
+              <a class="btn btn-default" v-if="this.edit == true" href="#" v-on:click="updateComponent">Save</a>
+              <a class="btn btn-default" v-if="this.edit == true" href="#" v-on:click="this.edit = !this.edit">Cancel</a>
+            </td>
+            {% endraw %}
         </tr>
               <tr>
         <td colspan="2">
@@ -30,7 +91,6 @@
         </td>
       </tr>
   </table>
-
-  
+  </div>
 
 {% endblock %}

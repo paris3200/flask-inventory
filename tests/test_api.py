@@ -3,10 +3,53 @@
 
 import unittest
 
+from project.models import Component
 from tests.base import BaseTestCase
 
 
+from flask import jsonify
+import json
+
 class TestApi(BaseTestCase):
+    def login(self):
+
+        self.client.post(
+            '/login',
+            data=dict(email="ad@min.com", password="admin_user"),
+            follow_redirects=True
+        )
+    def create_vendor(self, vendorName="Achme",
+                      vendoraddress="123 Coyote Ln",
+                      vendorcity="Desert Plain",
+                      vendorState="CO",
+                      vendorWebsite="http://www.achme.com"):
+        self.login()
+        return self.client.post(
+            '/vendor/create',
+            data=dict(name=vendorName,
+                      line1=vendoraddress,
+                      city=vendorcity,
+                      state=vendorState,
+                      website=vendorWebsite),
+            follow_redirects=True)
+
+    def create_component(self, description="widget"):
+        self.login()
+        return self.client.post(
+            '/component/create',
+            data=dict(sku="12345", description=description),
+            follow_redirects=True)
+
+    def create_purchase_order(self, sku=12345, quantity=10):
+        self.login()
+        self.create_vendor()
+        self.create_component()
+        return self.client.post('/purchase_order/create/1',
+                                data=dict(sku=sku,
+                                          quantity=quantity,
+                                          total_price=2.00,
+                                          user_id=1),
+                                follow_redirects=True)
 
     def test_get_resources(self):
         # Components
@@ -27,7 +70,24 @@ class TestApi(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'[]', response.data)
 
-
+    def test_update_component(self):
+        with self.app.test_client() as c:
+            response = c.post(
+                    '/login',
+                    data=dict(email="ad@min.com", password="admin_user"),
+                    follow_redirects=True
+                )
+            self.create_component()
+            response = c.put('/api/components/900',
+                data = json.dumps({'sku':'sku123','description':'should fail'}),
+                content_type='application/json')
+            response = c.put('/api/components/1',
+                data = json.dumps({'sku':'OK123','description':'should update'}),
+                content_type='application/json')
+            comp = Component.query.get(1)
+            # raise ValueError(comp.sku)
+            self.assertEqual(comp.sku, u'OK123')
+            self.assertEqual(comp.description, u'should update')
     def test_about(self):
         # Ensure about route behaves correctly.
         response = self.client.get('/about', follow_redirects=True)
