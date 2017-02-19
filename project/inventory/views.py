@@ -45,11 +45,13 @@ class TransactionMakerView(View):
         if form.validate_on_submit():
             nt = Transaction()
             form.component.data = Component.query.get(form.component.data)
-            form.populate_obj(nt)
             nt.date_create = datetime.datetime.now()
-            if form.checkout.data:
-                nt.qty = form.qty.data * (-1)
-                if form.component.data.qty + nt.qty >= 0:
+            if request.form.get("checkout"):
+                void = form.qty.data * (-1)
+                if form.component.data.qty + void >= 0:
+                    form.populate_obj(nt)
+                    nt.component_id = form.component.data.id
+                    nt.qty = void
                     db.session.add(nt)
                     db.session.commit()
                     flash('Success: Items Checked Out')
@@ -57,16 +59,15 @@ class TransactionMakerView(View):
                     flash("Not enough items, only %s available" % (form.component.data.qty))
                     form.component.data = form.component.data.id
                     return render_template("/transaction/make.html", form=form, the_action=self.action_type)
-            elif form.checkin.data:
+            elif request.form.get("checkin"):
+                form.populate_obj(nt)
+                nt.component_id = form.component.data.id
                 nt.qty = form.qty.data
                 db.session.add(nt)
                 db.session.commit()
                 flash('Success: %s Checked In' % ("Items" if nt.qty > 1 else "Item"))
             return redirect(url_for('main.home'))
         return render_template("/transaction/make.html", form=form, the_action=self.action_type)
-
-
-
 
 ################
 #    routes    #
@@ -228,6 +229,7 @@ def view_component(component_id=None):
         component = Component.query.get_or_404(component_id)
         return render_template('component/view.html', result=component)
     component = Component.query.all()
+
     return render_template('/component/view_all.html', result=component)
 
 @inventory_blueprint.route('/manage-tags', methods=['GET','POST'])

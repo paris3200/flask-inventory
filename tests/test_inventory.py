@@ -209,6 +209,11 @@ class TestInventoryBlueprint(BaseTestCase):
             self.create_component()
             response = self.create_component("widget")
             self.assertIn(b'Component already exists', response.data)
+            self.client.post('/component/create',
+                    data=dict(sku="12345",
+                    description='something'),
+                    follow_redirects=True)
+            self.assertIn(b'Component already exists', response.data)
 
     def test_lineitem_total(self):
         with self.client:
@@ -272,6 +277,10 @@ class TestInventoryBlueprint(BaseTestCase):
                           tag_name='west coast'),
                 follow_redirects=True)
             self.assertIn(b'has been tagged with', response.data)
+            self.assertIn(b'WEST COAST', response.data)
+            response = self.client.get(
+                '/tag-component/1',
+                follow_redirects=True)
             self.assertIn(b'WEST COAST', response.data)
 
     def test_checkin_updates_transactions(self):

@@ -69,6 +69,12 @@ class TestApi(BaseTestCase):
         response = self.client.get('/api/single-tags', follow_redirects=True)
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'[]', response.data)
+        self.create_component()
+        response = self.client.get('/api/components/1', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'widget', response.data)
+
+
 
     def test_update_component(self):
         with self.app.test_client() as c:

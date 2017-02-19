@@ -87,8 +87,8 @@ $(document).ready(function() {
         var isItemCatTagged = this.isItemCatTagged;
         return this.items.filter(function(cv) {
           return (
-            cv.sku.toLowerCase().indexOf(str) > -1 || 
-            cv.description.toLowerCase().indexOf(str) > -1);
+            cv.sku.toLowerCase().indexOf(str.toLowerCase()) > -1 || 
+            cv.description.toLowerCase().indexOf(str.toLowerCase()) > -1);
         }).filter(function(v) {
           return (cTags.length == 0 || isItemTagged(v) );
         }).filter(function(nv) {
@@ -112,7 +112,7 @@ $(document).ready(function() {
     <label for="sstr">Search:</label>&nbsp;
     <input autocomplete="off" name="sstr" type="text" v-model="sstr">
     <div style="display:inline-block">
-      <ul class="list-unstyled" style="margin-left:20px">
+      <ul class="list-unstyled list-inline" style="margin-left:20px">
         <li v-for="cat in categories"><strong>{{cat.name}}</strong>
           <ul class="list-unstyled">
             <li v-for="t in cat.tags">
