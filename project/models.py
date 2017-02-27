@@ -186,7 +186,8 @@ class Component(db.Model):
                            secondary=components_tags,
                            backref='component')
 
-    @hybrid_property
+    # @hybrid_property
+    @property
     def qty(self):
         # the_query = Transaction.filter(Transaction.component_id == self.id)
         # qty_available = the_query.with_entities(sum(Transaction.qty).label('available')).first()
@@ -194,6 +195,7 @@ class Component(db.Model):
         s = 0
         for i in qty_available:
             s += i
+        # print(qty_available)
         return s
 
 
