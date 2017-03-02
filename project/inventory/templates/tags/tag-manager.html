@@ -1,26 +1,157 @@
 {% extends '_base.html' %}
 {% import "bootstrap/wtf.html" as wtf %}
 
+{% block js %}
+{{super()}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.10/vue.min.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/vue.resource/1.1.0/vue-resource.min.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.0.3/vue-resource.min.js"></script>
+<script>
+$(document).ready(function() {
+  var app = new Vue({
+    el : '#tag-manager-app',
+    data : {
+      items : [],
+      singleTags : [],
+      checkedTags: [],
+      checkedCategoryTags: [],
+      categories: [],
+      sstr : '',
+    },
+    created : function() {
+      this.getItems();
+      this.getSingleTags();
+      this.getCategories();
+    },
+    methods : {
+      getItems : function() {
+        this.$http.get('/api/components').then(response => {
+          this.items = response.body;
+        }, response => {
+          console.log('error getting components');
+        })
+      },
+      getSingleTags : function() {
+        this.$http.get('/api/single-tags').then(response => {
+          this.singleTags = response.body;
+        }, response => {
+          console.log('error getting single tags');
+        })
+      },
+      getCategories : function() {
+        this.$http.get('/api/categories').then(response => {
+          this.categories = response.body;
+        }, response => {
+          console.log('error getting categories');
+        })
+      },
+      applyToCheckIn: function(theId) {
+        // select in form pull down
+        $("#component").val(theId);
+      },
+      deleteTag: function(theId) {
+        this.$http.delete('/api/tag/'+theId).then(response => {
+          alert('Tag deleted');
+          location.reload(true);
+        });
+      },
+      isItemTagged : function(item) {
+        var cTags = this.checkedTags;
+        var found = false;
+        console.log(cTags);
+        item.tags.forEach(function(cv,idx) {
+          if ($.inArray(cv.name.toUpperCase(), cTags) != -1) {
+            console.log("FOUND ITEM");
+            console.log(cv.name, cTags);
+            console.log("/FOUND ITEM");
+            found = true;
+          }
+        });
+        return found;
+      },
+      isItemCatTagged : function(item) {
+        var cTags = this.checkedCategoryTags;
+        var found = false;
+        console.log(cTags);
+        item.tags.forEach(function(cv,idx) {
+          if ($.inArray(cv.name.toUpperCase(), cTags) != -1) {
+            console.log("FOUND ITEM");
+            console.log(cv.name, cTags);
+            console.log("/FOUND ITEM");
+            found = true;
+          }
+        });
+        return found;
+      },
+    },
+    computed: {
+      filteredItems : function() {
+        var str = this.sstr;
+        var cTags = this.checkedTags;
+        var cCatTags = this.checkedCategoryTags;
+        var isItemTagged = this.isItemTagged;
+        var isItemCatTagged = this.isItemCatTagged;
+        return this.items.filter(function(cv) {
+          return (
+            cv.sku.toLowerCase().indexOf(str.toLowerCase()) > -1 || 
+            cv.description.toLowerCase().indexOf(str.toLowerCase()) > -1);
+        }).filter(function(v) {
+          return (cTags.length == 0 || isItemTagged(v) );
+        }).filter(function(nv) {
+          return (cCatTags.length == 0 || isItemCatTagged(nv));
+        });
+      }
+    }
+
+  })
+});
+</script>
+{% endblock %}
+
+{% block css %}
+<style>
+li.tag-item {
+  border-radius: 7px;
+  padding:10px;
+  background-color: #AEA;
+  margin-top:10px;
+}
+a.tag-control {
+  color: #595;
+  float:right;
+}
+</style>
+{% endblock %}
+
+
+
 {% block content %}
+  {% raw %}
+  <div id="tag-manager-app">
+    <header class="content-header">
+      <h1>Tag Manager</h1>
+    </header>
 
-  <header class="content-header">
-    <h1>Tag Manager</h1>
-  </header>
-  <h3>Tags With Categories</h3>
-  <ul class="list-unstyled list-inline">
-    {% for c in categories %}
-    {% for t in c.tags %}
-    <li class="component-tag"><span>{{ c.name }}</span>:<span>{{ t.name }}</span></li>
-    {% endfor %}
-    {% endfor %}
-  </ul>
-  <h3>Single Tags (not part of a category )</h3>
-  <ul class="list-unstyled list-inline">
-    {% for t in uncategorized_tags %}
-    <li class="component-tag"><span>{{ t.name }}</span></li>
-    {% endfor %}
-  </ul>
+    <h3>Tags With Categories</h3>
+    <div style="display:inline-block">
+        <ul class="list-unstyled list-inline" style="margin-left:20px">
+          <li v-for="cat in categories">
+            <ul class="list-unstyled">
+              <li class="tag-item" v-for="t in cat.tags"><span>{{ cat.name }}</span>:<span>{{t.name}}</span><a class="tag-control" href="#" v-on:click="deleteTag(t.id)">delete</a></li>
+            </ul>
+          </li>
+        </ul>
+    </div>
 
+    <h3>Single Tags (not part of a category )</h3>
+    <ul class="list-unstyled list-inline">
+      <li class="tag-item" v-for="tag in singleTags">
+        <span>{{tag.name}}</span><a class="tag-control" href="#" v-on:click="deleteTag(tag.id)" >delete</a>
+      </li>
+    </ul>
+
+  </div>
+  {% endraw %}
 
   <h3>Create A New Tag</h3><i>click on any tag/category above to populate fields below</i>
   <form method="POST" action="">
