@@ -29,8 +29,8 @@
     </tr>
     {% for l in result.line_item %}
         <tr>
-            <td>{{ l.component.sku }}</td>
-            <td>{{ l.component.description }}</td>
+            <td>{{ l.vendor_component.sku }}</td>
+            <td>{{ l.vendor_component.description }}</td>
             <td>{{ l.quantity }}</td>
             <td>{{ l.unit_price }}</td>
             <td>{{ l.total_price }}</td>
