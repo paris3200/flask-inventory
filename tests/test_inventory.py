@@ -56,6 +56,8 @@ class TestInventoryBlueprint(BaseTestCase):
         self.login()
         self.create_vendor()
         self.create_vendor_component()
+        resp = self.client.get('/purchase_order/create/1', follow_redirects=True)
+        self.assertEqual(resp.status_code, 200)
         return self.client.post('/purchase_order/create/1',
                                 data=dict(sku=sku,
                                           quantity=quantity,

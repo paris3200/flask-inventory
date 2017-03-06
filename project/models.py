@@ -139,16 +139,6 @@ class VendorComponent(db.Model):
     vendor_id = db.Column(db.Integer, db.ForeignKey('vendor.id'),
                           nullable=False)
 
-    @hybrid_property
-    def qty(self):
-        # the_query = Transaction.filter(Transaction.component_id == self.id)
-        # qty_available = the_query.with_entities(sum(Transaction.qty).label('available')).first()
-        qty_available = [x.qty for x in self.transactions]
-        s = 0
-        for i in qty_available:
-            s += i
-        return s
-
 class LineItem(db.Model):
     __tablename__ = "line_item"
 
@@ -189,13 +179,10 @@ class Component(db.Model):
     # @hybrid_property
     @property
     def qty(self):
-        # the_query = Transaction.filter(Transaction.component_id == self.id)
-        # qty_available = the_query.with_entities(sum(Transaction.qty).label('available')).first()
         qty_available = [x.qty for x in self.transactions]
         s = 0
         for i in qty_available:
             s += i
-        # print(qty_available)
         return s
 
 
