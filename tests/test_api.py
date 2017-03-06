@@ -96,7 +96,7 @@ class TestApi(BaseTestCase):
         response = self.client.delete('/api/tag/'+'39282')
         self.assertEqual(response.status_code, 404)
         response = self.client.delete('/api/tag/'+str(tag_id))
-        self.assertEqual(str(tag_id),response.data.strip())
+        self.assertEqual(str(tag_id).encode(),response.data.strip())
 
 
 
