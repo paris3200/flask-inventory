@@ -3,7 +3,7 @@
 
 import unittest
 
-from project.models import Component
+from project.models import Component, Tag
 from tests.base import BaseTestCase
 
 
@@ -12,12 +12,26 @@ import json
 
 class TestApi(BaseTestCase):
     def login(self):
-
         self.client.post(
             '/login',
             data=dict(email="ad@min.com", password="admin_user"),
             follow_redirects=True
         )
+    def create_single_tag(self):
+        with self.client:
+            self.login()
+            response = self.client.get(
+                '/manage-tags',
+                follow_redirects=True)
+            # creating cats and tags should strip down form data
+            new_single_tag = 'lonely tag '
+            response = self.client.post(
+                '/manage-tags',
+                data=dict(category='',
+                          tag_name=new_single_tag,
+                          make="OK"),
+                follow_redirects=True)
+
     def create_vendor(self, vendorName="Achme",
                       vendoraddress="123 Coyote Ln",
                       vendorcity="Desert Plain",
@@ -73,6 +87,16 @@ class TestApi(BaseTestCase):
         response = self.client.get('/api/components/1', follow_redirects=True)
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'widget', response.data)
+
+    def test_delete_tag(self):
+        self.create_single_tag()
+        tag = Tag.query.first()
+        self.assertEqual(tag.id, 1)
+        tag_id = tag.id
+        response = self.client.delete('/api/tag/'+'39282')
+        self.assertEqual(response.status_code, 404)
+        response = self.client.delete('/api/tag/'+str(tag_id))
+        self.assertEqual(str(tag_id).encode(),response.data.strip())
 
 
 

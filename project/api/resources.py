@@ -41,15 +41,35 @@ class SingleTagsAPI(Resource):
 	decorators = [login_required]
 	@marshal_with(tag)
 	def get(self):
-		return Tag.query.filter(Tag.categories == None).all()
+		tags = Tag.query.filter(Tag.categories == None).all()
+		for t in tags:
+			setattr(t,'__repr__',str(t))
+		return tags
+	
+
+class TagAPI(Resource):
+	decorators = [login_required]
+	def delete(self, tag_id):
+		tag = Tag.query.get(tag_id)
+		if tag:
+			tag_id = tag.id
+			db.session.delete(tag)
+			db.session.commit()
+			return tag_id
+		return ([],404)
+
 
 class CategoriesAPI(Resource):
 	decorators = [login_required]
 	@marshal_with(category)
 	def get(self):
-		return TagCategory.query.all()
+		cats = TagCategory.query.all()
+		for c in cats:
+			setattr(c,'__repr__',c)
+		return cats
 
 
 api.add_resource(ComponentsAPI, '/components','/components/<int:component_id>')
 api.add_resource(SingleTagsAPI, '/single-tags')
 api.add_resource(CategoriesAPI, '/categories')
+api.add_resource(TagAPI, '/tag/<int:tag_id>')

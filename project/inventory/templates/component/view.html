@@ -73,7 +73,7 @@ $(document).ready(function() {
             <td>
               <a class="btn btn-default" v-if="this.edit == false" href="#" v-on:click="edit = !edit">Edit</a>
               <a class="btn btn-default" v-if="this.edit == true" href="#" v-on:click="updateComponent">Save</a>
-              <a class="btn btn-default" v-if="this.edit == true" href="#" v-on:click="this.edit = !this.edit">Cancel</a>
+              <a class="btn btn-default" v-if="this.edit == true" href="#" v-on:click="edit = !edit">Cancel</a>
             </td>
             {% endraw %}
         </tr>
