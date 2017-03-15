@@ -1,12 +1,40 @@
 {% extends '_base.html' %}
 {% import "bootstrap/wtf.html" as wtf %}
 
+
+{% block js %}
+{{ super() }}
+<script>
+$(document).ready(function() {
+    $(".period").click(function() {
+        console.log(this);
+        $("#period").val($(this).attr("data-period"));
+        $("form[name='filter_form']").submit();
+    });
+});
+</script>
+{% endblock %}
+
 {% block content %}
 
   <header class="content-header">
     <h1>Transactions</h1>
   </header>
-
+    <form action="{{ url_for('inventory.transactions') }}" name="filter_form">
+        <input id="period" type="hidden" name="period" value="{{ period }}">
+        <input id="page" type="hidden" name="page" value="{{ page }} ">
+        <ul class="list-inline">
+            <li><button data-period="month"     class="period btn {% if period == 'month'    %} btn-primary {% else %} btn-default {% endif %}">Current Month</button></li>
+            <li><button data-period="ten_days"  class="period btn {% if period == 'ten_days' %} btn-primary {% else %} btn-default {% endif %}">Last 10 Days</button></li>
+            <li><button data-period="today"     class="period btn {% if period == 'today'    %} btn-primary {% else %} btn-default {% endif %}">Today</button></li>
+            <li><button data-period="all"       class="period btn {% if period == 'all'      %} btn-primary {% else %} btn-default {% endif %}">All</button></li>
+            <li><input  class="form-control"
+                style="display:inline-block" type="text"
+                placeholder="search" value="{{ search }}"
+                name="search"
+                /></li>
+        </ul>
+    </form>
   <table class="table table-striped table-bordered table-hover">
     <tr>
         <th>Item</th>
@@ -15,10 +43,10 @@
         <th>Time</th>
         <th>User</th>
     </tr>
-    {% for c in transactions %}
+    {% for c in transactions.items %}
         <tr>
             <td>{{ c.component.sku }}</td>
-            <td>{{ c.qty }}</td>
+            <td class="text-right">{{ c.qty }}</td>
             <td>{{ c.notes }}</td>
             <td>{{ c.date_create.strftime("%m/%d/%Y %H:%M %P  ") }}</td>
             <td>{{ c.user.email }}</td>

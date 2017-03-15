@@ -83,9 +83,34 @@ class TransactionMakerView(View):
 @inventory_blueprint.route('/transactions/', methods=['GET'])
 @login_required
 def transactions():
-    transactions = Transaction.query.all()
+    page = request.args.get("page", 1)
+    if page==u"":
+        page=1
+    else:
+        page = int(page)
+    period = request.args.get("period", None)
+    search = request.args.get("search")
+    query = Transaction.query.order_by(Transaction.date_create.desc())
+    if search and search !="":
+        period="all"
+        query = query.filter(Transaction.notes.contains(search))
+    if period == 'ten_days':
+        period_date = datetime.datetime.now()
+        time_delta = datetime.timedelta(days=-10)
+        period_date = period_date + time_delta
+        query = query.filter(Transaction.date_create > period_date)
+    elif period == 'today':
+        period_date = datetime.datetime.now()
+        period_date = period_date.replace(hour=0, minute=0)
+        query = query.filter(Transaction.date_create > period_date)
+    elif period == 'month':
+        period_date = datetime.date.today()
+        period_date = period_date.replace(day=1)
+        period_date = datetime.datetime.combine(period_date, datetime.datetime.min.time())
+        query = query.filter(Transaction.date_create > period_date)
+    transactions = query.paginate(page, per_page=20, error_out=True)
     return render_template("/transaction/transactions.html",
-                           transactions=transactions)
+                           transactions=transactions, page=page, period=period, search=search)
 
 
 inventory_blueprint.add_url_rule(
