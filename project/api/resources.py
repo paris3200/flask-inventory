@@ -11,6 +11,9 @@ parser = reqparse.RequestParser(bundle_errors = True)
 parser.add_argument('sku', type=str, location='json')
 parser.add_argument('description', type=str, location='json')
 
+parser.add_argument('tag_text', type=str, location='json')
+parser.add_argument('cat_text', type=str, location='json')
+
 class ComponentsAPI(Resource):
 	decorators = [login_required]
 	@marshal_with(item)
@@ -68,8 +71,32 @@ class CategoriesAPI(Resource):
 			setattr(c,'__repr__',c)
 		return cats
 
+class ComponentTagsAPI(Resource):
+	decorators = [login_required]
+	@marshal_with(item)
+	def delete(self, component_id, tag_id):
+		comp = Component.query.get(component_id)
+		tag = Tag.query.get(tag_id)
+		comp.remove_tag(tag.name)
+		return comp
+
+	@marshal_with(item)
+	def put(self,component_id,tag_id=None):
+		comp = Component.query.get(component_id)
+		args = parser.parse_args()
+		tag_text = args.get('tag_text')
+		cat_text = args.get('cat_text')
+		if tag_text:
+			comp.tag_with(tag_text, cat_text)
+		if not comp:
+			return 404
+		return comp
+
 
 api.add_resource(ComponentsAPI, '/components','/components/<int:component_id>')
+api.add_resource(ComponentTagsAPI, '/component-tags/<int:component_id>', '/component-tags/<int:component_id>/<int:tag_id>')
+# api.add_resource(ComponentTagsAPI, '/component-tags/<int:component_id>/<int:tag_id>')
+
 api.add_resource(SingleTagsAPI, '/single-tags')
 api.add_resource(CategoriesAPI, '/categories')
 api.add_resource(TagAPI, '/tag/<int:tag_id>')

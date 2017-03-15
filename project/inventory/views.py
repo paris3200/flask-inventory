@@ -13,7 +13,7 @@ from flask_login import login_required
 
 from project import db
 from project.models import Vendor, PurchaseOrder, LineItem, Component, Address,\
-    Transaction, TagCategory, Tag, VendorComponent
+    Transaction, TagCategory, Tag, VendorComponent, TagManager
 from project.inventory.forms import VendorCreateForm, PurchaseOrderForm, \
     ComponentCreateForm, TransactionForm, TagForm
 
@@ -277,22 +277,12 @@ def view_component(component_id=None):
 def manage_tags():
     form = TagForm(request.form)
     if form.validate_on_submit():
-        cat = form.category.data.strip().upper()
-        tag = form.tag_name.data.strip().upper()
-        cat_obj = TagCategory.query.filter_by(name=cat).first()
-        tag_obj = Tag.query.filter_by(name=tag).first()
-        if not cat_obj and cat:
-            cat_obj = TagCategory(cat)
-            db.session.add(cat_obj)
-            flash('Category %s Created' % cat)
-        if not tag_obj:
-            tag_obj = Tag(tag)
-            flash('Tag %s Created' % tag)
-            db.session.add(tag_obj)
-        db.session.commit()
-        if cat_obj and tag_obj not in cat_obj.tags:
-            cat_obj.tags.append(tag_obj)
-        db.session.commit()
+        # returns tag object (new or existing). returns None if invalid params
+        new_tag = TagManager.new_tag(form.tag_name.data, form.category.data)
+        if new_tag:
+            flash('Tag "%s" was Created' % new_tag)
+        else:
+            flash('Tag could not be created')
     categories = TagCategory.query.all()
     uncategorized_tags = Tag.query.filter(Tag.categories is None).all()
     return render_template("/tags/tag-manager.html",
@@ -307,24 +297,12 @@ def tag_component(component_id=None):
     form = TagForm(request.form)
     the_component = Component.query.get_or_404(component_id)
     if form.validate_on_submit():
-        cat = form.category.data.strip().upper()
-        tag = form.tag_name.data.strip().upper()
-        cat_obj = TagCategory.query.filter_by(name=cat).first()
-        tag_obj = Tag.query.filter_by(name=tag).first()
-        if cat and not cat_obj:
-            cat_obj = TagCategory(cat)
-            db.session.add(cat_obj)
-        if not tag_obj:
-            tag_obj = Tag(tag)
-            db.session.add(tag_obj)
-        db.session.commit()
-        if cat_obj and tag_obj not in cat_obj.tags:
-            cat_obj.tags.append(tag_obj)
-        if tag_obj not in the_component.tags:
-            the_component.tags.append(tag_obj)
-        db.session.commit()
-        flash("%s (%s) has been tagged with %s" %
+        tag_obj = the_component.tag_with(form.tag_name.data, form.category.data)
+        if tag_obj:
+            flash("%s (%s) has been tagged with %s" %
               (the_component.description, the_component.sku, tag_obj.name))
+        else:
+            flash("There was an error tagging the component")
         return redirect(url_for('inventory.view_component',
                                 component_id=component_id))
     categories = TagCategory.query.all()

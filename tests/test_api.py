@@ -98,6 +98,58 @@ class TestApi(BaseTestCase):
         response = self.client.delete('/api/tag/'+str(tag_id))
         self.assertEqual(str(tag_id).encode(),response.data.strip())
 
+    def test_remove_tag(self):
+        # tag a component
+        with self.client:
+            self.login()
+            self.create_component()
+            response = self.client.post(
+                '/tag-component/1',
+                data=dict(category='Region',
+                          tag_name='west coast'),
+                follow_redirects=True)
+            self.assertIn(b'has been tagged with', response.data)
+            self.assertIn(b'WEST COAST', response.data)
+        component = Component.query.get(1)
+        tag_id = Tag.query.filter_by(name='WEST COAST').first().id
+        response = self.client.delete('/api/component-tags/%s/%s' % (component.id, tag_id))
+        response = self.client.delete('/api/tag/'+str(tag_id))
+        self.assertEqual(str(tag_id).encode(),response.data.strip())
+
+    def test_tag_component(self):
+        # tag a component
+        with self.client:
+            self.login()
+            self.create_component()
+            response = self.client.post(
+                '/tag-component/1',
+                data=dict(category='Region',
+                          tag_name='west coast'),
+                follow_redirects=True)
+            self.assertIn(b'has been tagged with', response.data)
+            self.assertIn(b'WEST COAST', response.data)
+        component = Component.query.get(1)
+        tag_id = Tag.query.filter_by(name='WEST COAST').first().id
+        response = self.client.put('/api/component-tags/%s' % (1, ),
+                data = json.dumps({'tag_text':'MY tag  ','cat_text':'  custom Cat'}),
+                content_type = 'application/json'
+            )
+        response = self.client.get('/api/components/1', follow_redirects=True)
+        self.assertIn(b'MY TAG', response.data)
+
+        response = self.client.get('/api/categories', follow_redirects=True)
+        self.assertIn(b'CUSTOM CAT', response.data)        
+        # with self.client:
+        #     self.login()
+        #     self.create_component()
+        #     response = self.client.post(
+        #         '/tag-component/1',
+        #         data=dict(category='Region',
+        #                   tag_name='west coast'),
+        #         follow_redirects=True)
+        #     self.assertIn(b'CUSTOM CAT', response.data)
+        #     self.assertIn(b'MY TAG', response.data)
+        
 
 
     def test_update_component(self):
