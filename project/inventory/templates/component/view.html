@@ -21,6 +21,7 @@ $(document).ready(function() {
       getComponent : function() {
         this.$http.get('/api/components/{{result.id}}').then(response => {
           this.result = response.body;
+          console.log(this.result.tags);
         }, response => {
           console.log('error getting component');
         })
@@ -34,6 +35,15 @@ $(document).ready(function() {
           console.log('error updating component');
         })
       },
+      removeTag: function(component,tagId) {
+        this.$http.delete('/api/component-tags/'+String(component.id)+'/'+String(tagId)).then(response => {
+          this.result = response.body;
+          alert('Tag removed');
+        }, error => {
+          console.log('error deleting tag');
+        })
+
+      }
     },
     computed: {
     }
@@ -53,13 +63,14 @@ $(document).ready(function() {
   <div id="component-app">
     <div class="hidden" id="html-returned-sku">{{result.sku}}</div>
     <div class="hidden" id="html-returned-description">{{result.description}}</div>
+    {% raw %}
   <table class="table table-striped table-bordered table-hover">
     <tr>
         <th>Sku</th>
         <th>Description</th>
     </tr>
         <tr>
-            {% raw %}
+            
             <td><span v-if="this.edit == false" v-model="result.sku">
                     {{ result.sku }}
                   </span>
@@ -75,18 +86,16 @@ $(document).ready(function() {
               <a class="btn btn-default" v-if="this.edit == true" href="#" v-on:click="updateComponent">Save</a>
               <a class="btn btn-default" v-if="this.edit == true" href="#" v-on:click="edit = !edit">Cancel</a>
             </td>
-            {% endraw %}
+            
         </tr>
               <tr>
         <td colspan="2">
           <span style="">tags:</span>
           <ul class="list-unstyled list-inline">
-          {% for t in result.tags %}
-            <li class="component-tag">{{t.name}}</li>
-          {% else %}
-            <li><i>Has not been tagged</i></li>
-          {% endfor %}
+            <li v-if="result && result.tags" v-for="tag in result.tags" class="component-tag">{{tag.name}}<a class="tag-control" href="#" v-on:click="removeTag(result, tag.id)">remove</a></li>
+            <li v-else><i>Has not been tagged</i></li>
           </ul>
+          {% endraw %}
           <a href="{{ url_for('inventory.tag_component',component_id=result.id) }}" class="btn btn-primary">Add tag</a>
         </td>
       </tr>

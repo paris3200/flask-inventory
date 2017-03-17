@@ -375,6 +375,24 @@ class TestInventoryBlueprint(BaseTestCase):
                           user_id="1"),
                 follow_redirects=True)
             self.assertIn(b'Success: Items Checked Out', response.data)
+        # now check transactions - search
+        with self.client:
+            self.login()
+            response = self.client.get(
+                '/transactions/', follow_redirects=True)
+            self.assertIn(b"Checking out 6 of em", response.data)
+            response = self.client.get(
+                '/transactions/?search=Checking', follow_redirects=True)
+            self.assertIn(b"Checking out 6 of em", response.data)
+            response = self.client.get(
+                '/transactions/?search=Checking&period=ten_days', follow_redirects=True)
+            self.assertIn(b"Checking out 6 of em", response.data)
+            response = self.client.get(
+                '/transactions/?search=Checking&period=month', follow_redirects=True)
+            self.assertIn(b"Checking out 6 of em", response.data)
+            response = self.client.get(
+                '/transactions/?search=Checking&period=all', follow_redirects=True)
+            self.assertIn(b"Checking out 6 of em", response.data)
 
     def test_checkin_checkout(self):
         with self.client:

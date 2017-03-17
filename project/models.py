@@ -184,6 +184,38 @@ class Component(db.Model):
         for i in qty_available:
             s += i
         return s
+    def tag_with(self, tag, cat=None):
+        tag = tag.strip().upper()
+        if cat: cat = cat.strip().upper()
+        tag_obj = Tag.query.filter_by(name=tag).first() 
+        cat_obj = TagCategory.query.filter_by(name=cat).first() if cat else None
+        commit = False
+        if cat and not cat_obj:
+            cat_obj = TagCategory(cat)
+            db.session.add(cat_obj)
+            commit = True
+        if not tag_obj:
+            tag_obj = Tag(tag)
+            db.session.add(tag_obj)
+            commit = True
+        if cat_obj and tag_obj not in cat_obj.tags:
+            cat_obj.tags.append(tag_obj)
+            commit = True
+        if tag_obj not in self.tags:
+            self.tags.append(tag_obj)
+            commit = True
+        if commit:
+            db.session.commit()
+            return tag_obj
+        return None
+    def remove_tag(self, tag):
+        for idx, tag_obj in enumerate(self.tags):
+            if tag_obj.name == tag:
+                self.tags.pop(idx)
+                break
+        db.session.commit()
+        return self
+
 
 
 class Transaction(Base):
@@ -223,3 +255,26 @@ class Tag(db.Model):
     def __repr__(self):
         return "%s in: %s" % (self.name, str(
             None) if self.categories is None else ",".join([x.name for x in self.categories]))
+
+
+class TagManager():
+    @staticmethod
+    def new_tag(tag, cat=None):
+        tag = tag.strip().upper()
+        if cat: cat = cat.strip().upper()
+        cat_obj = TagCategory.query.filter_by(name=cat).first() if cat else None
+        tag_obj = Tag.query.filter_by(name=tag).first()
+        commit = False
+        if not cat_obj and cat:
+            cat_obj = TagCategory(cat)
+            db.session.add(cat_obj)
+            commit = True
+        if not tag_obj:
+            tag_obj = Tag(tag)
+            db.session.add(tag_obj)
+            commit = True
+        if cat_obj and tag_obj not in cat_obj.tags:
+            cat_obj.tags.append(tag_obj)
+            commit = True
+        if commit:  db.session.commit()
+        return tag_obj
