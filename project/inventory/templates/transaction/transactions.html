@@ -30,7 +30,7 @@ $(document).ready(function() {
             <li><button data-period="all"       class="period btn {% if period == 'all'      %} btn-primary {% else %} btn-default {% endif %}">All</button></li>
             <li><input  class="form-control"
                 style="display:inline-block" type="text"
-                placeholder="search" value="{{ search }}"
+                placeholder="search" value="{{ search if search != None else '' }}"
                 name="search"
                 /></li>
         </ul>
