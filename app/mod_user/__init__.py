@@ -1,1 +1,1 @@
-# project/user/__init__.py
+# app/mod_user/__init__.py

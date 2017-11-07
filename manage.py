@@ -14,10 +14,10 @@ COV = coverage.coverage(
 )
 COV.start()
 
-from project import app, db
-from project.models import User
+from app import create_app
+from app.models import db, User
 
-
+app = create_app()
 migrate = Migrate(app, db)
 manager = Manager(app)
 

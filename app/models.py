@@ -1,11 +1,13 @@
-# project/models.py
+# app/models.py
 
 
 import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql.functions import sum
 
-from project import db, bcrypt
+from . import bcrypt
+from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy()
 
 tag_categories_tags = db.Table('tag_categories_tags',
                                db.Column('tag_category_id',
