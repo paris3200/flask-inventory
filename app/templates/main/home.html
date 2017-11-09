@@ -1,11 +1,36 @@
 {% extends "_base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
 
 {% block content %}
 
+
+
+
 <div class="body-content">
   <div class="row">
-    <h1>Welcome To Flask-Inventory</h1>
-    <h3>Designed To Solve Real World Problems</h3>
+  	<form class="form" role="form" method="post" action="{{ url_for('user.login') }}">
+
+  	  {{ form.csrf_token }}
+  	  {{ form.hidden_tag() }}
+  	  {{ wtf.form_errors(form, hiddens="only") }}
+
+
+  	  <div class="col-lg-4 col-sm-4">
+
+    	<h1>ItemCheckOut.com</h1>
+    	<h3>Item Management Solution</h3>
+    	<br><br>
+  	    {{ wtf.form_field(form.email) }}
+  	    {{ wtf.form_field(form.password) }}
+
+  	    <button class="btn btn-success pull-right" type="submit">Sign In</button>
+  	    <br><br>
+  	    {# <p>Need to <a href="{{ url_for('user.register') }}">Register</a>?</p> #}
+  	  </div>
+
+  	</form>
+  	
   </div>
 </div>
 	{% if current_user.is_authenticated() %}
