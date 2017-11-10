@@ -1,8 +1,12 @@
-from flask import Blueprint
+import os
+from flask import Blueprint, current_app
 from flask_restful import Resource, Api, reqparse, marshal_with
 from flask_login import login_required
-from ..models import db, Component, Tag, components_tags, TagCategory
+from ..models import db, Component, Tag, components_tags, TagCategory, Picture
 from .marshals import *
+
+from werkzeug.datastructures import FileStorage
+from werkzeug.utils import secure_filename
 
 api_module = Blueprint('api', __name__,  url_prefix = '/api')
 api = Api(api_module)
@@ -92,11 +96,50 @@ class ComponentTagsAPI(Resource):
 			return 404
 		return comp
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+class PicturesAPI(Resource):
+	decorators = [login_required]
+	
+	parse = reqparse.RequestParser()
+	parse.add_argument('picture_file', type=FileStorage, location='files')
+	@marshal_with(picture)
+	def get(self, component_id=None):
+		pictures = Picture.query.all()
+		# for t in tags:
+		# 	setattr(t,'__repr__',str(t))
+		return pictures
+	
+	@marshal_with(picture)
+	def post(self, component_id=None):
+		args = self.parse.parse_args()
+		if component_id:
+			comp = Component.query.get(component_id)
+			print("args")
+			print(args)
+			if comp:
+				picture = args['picture_file']
+				if picture.filename:
+					new_picture = Picture()
+					filename = secure_filename(picture.filename)
+					new_picture.filename = filename
+					db.session.add(new_picture)
+					db.session.flush()
+					new_picture.filename = str(new_picture.id).zfill(5)+new_picture.filename
+					db.session.commit()
+					picture.save(os.path.join(current_app.config['PICTURES_FOLDER'], new_picture.filename))
+					return Picture.query.all()
+		return []
 
 api.add_resource(ComponentsAPI, '/components','/components/<int:component_id>')
 api.add_resource(ComponentTagsAPI, '/component-tags/<int:component_id>', '/component-tags/<int:component_id>/<int:tag_id>')
 # api.add_resource(ComponentTagsAPI, '/component-tags/<int:component_id>/<int:tag_id>')
-
 api.add_resource(SingleTagsAPI, '/single-tags')
 api.add_resource(CategoriesAPI, '/categories')
 api.add_resource(TagAPI, '/tag/<int:tag_id>')
+
+# pictures
+api.add_resource(PicturesAPI, '/pictures','/pictures/<int:component_id>')

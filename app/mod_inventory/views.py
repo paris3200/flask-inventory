@@ -292,7 +292,7 @@ def create_component():
 def view_component(component_id=None):
     if component_id:
         component = Component.query.get_or_404(component_id)
-        return render_template('component/view.html', result=component)
+        return render_template('inventory/component/view.html', result=component)
     component = Component.query.all()
 
     return render_template('inventory/component/view_all.html', result=component)

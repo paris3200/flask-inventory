@@ -20,6 +20,7 @@ class DevConfig(BaseConfig):
     BCRYPT_LOG_ROUNDS = 1
     WTF_CSRF_ENABLED = False
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'dev.sqlite')
+    PICTURES_FOLDER = os.path.join(basedir,'app','static','pictures')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG_TB_ENABLED = False
 

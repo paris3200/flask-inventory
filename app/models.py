@@ -25,6 +25,14 @@ components_tags = db.Table('components_tags',
                                      db.Integer(),
                                      db.ForeignKey('tag.id')))
 
+components_pictures = db.Table('components_pictures',
+                           db.Column('component_id',
+                                     db.Integer(),
+                                     db.ForeignKey('component.id')),
+                           db.Column('picture_id',
+                                     db.Integer(),
+                                     db.ForeignKey('picture.id')))
+
 
 class Base(db.Model):
     __abstract__ = True
@@ -178,6 +186,10 @@ class Component(db.Model):
                            secondary=components_tags,
                            backref='component')
 
+    pictures = db.relationship("Picture",
+                           secondary=components_pictures,
+                           backref='component')
+
     # @hybrid_property
     @property
     def qty(self):
@@ -280,3 +292,18 @@ class TagManager():
             commit = True
         if commit:  db.session.commit()
         return tag_obj
+
+class Picture(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    filename = db.Column(db.String(25), unique=True, nullable=False)
+
+    components = db.relationship("Component",
+                           secondary=components_pictures,
+                           backref='picture')
+
+    def __repr__(self):
+        components_list = ','.join([x.sku for x in self.components])
+        return "<Picture: filename:%s, for items(%s): [%s] >" % (
+            self.filename,
+            len(self.components),
+            components_list)
