@@ -133,7 +133,7 @@ def view_vendor(vendor_id=None):
     if vendor_id:
         vendor = Vendor.query.get_or_404(vendor_id)
         orders = PurchaseOrder.query.filter_by(vendor_id=vendor.id)
-        return render_template('vendor/view.html', vendor=vendor,
+        return render_template('inventory/vendor/view.html', vendor=vendor,
                                purchase_orders=orders)
     vendors = Vendor.query.all()
     return render_template('inventory/vendor/view_all.html', entries=vendors)
@@ -166,7 +166,7 @@ def create_vendor():
             else:
                 flash('Vendor already exist.')
                 return redirect(url_for('.view_vendor'))
-    return render_template('vendor/create.html', form=form)
+    return render_template('inventory/vendor/create.html', form=form)
 
 
 @inventory_blueprint.route('/vendor/edit/<int:vendor_id>',

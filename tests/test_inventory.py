@@ -4,8 +4,8 @@
 import unittest
 
 from tests.base import BaseTestCase
-from project.models import LineItem, Component, Vendor, VendorComponent
-from project.inventory.forms import VendorCreateForm, PurchaseOrderForm, \
+from app.models import LineItem, Component, Vendor, VendorComponent
+from app.mod_inventory.forms import VendorCreateForm, PurchaseOrderForm, \
     ComponentCreateForm
 
 
@@ -30,7 +30,7 @@ class TestInventoryBlueprint(BaseTestCase):
                       vendorWebsite="http://www.achme.com"):
         self.login()
         return self.client.post(
-            '/vendor/create',
+            'inventory/vendor/create',
             data=dict(name=vendorName,
                       line1=vendoraddress,
                       city=vendorcity,
@@ -48,7 +48,7 @@ class TestInventoryBlueprint(BaseTestCase):
     def create_vendor_component(self, description="widget"):
         self.login()
         return self.client.post(
-            'vendor/1/component/create',
+            '/vendor/1/component/create',
             data=dict(sku="12345", description=description, vendor_id=1),
             follow_redirects=True)
 
@@ -80,7 +80,7 @@ class TestInventoryBlueprint(BaseTestCase):
         with self.client:
             self.login()
             # Ensure about route behaves correctly.
-            response = self.client.get('/vendor/create', follow_redirects=True)
+            response = self.client.get('/inventory/vendor/create', follow_redirects=True)
             self.assertIn(b'<h1>Create Vendor</h1>\n', response.data)
 
     def test_create_vendor_website_not_required(self):
@@ -92,7 +92,7 @@ class TestInventoryBlueprint(BaseTestCase):
 
     def test_create_vendor_route_requires_login(self):
         # Ensure member route requres logged in user.
-        response = self.client.get('/vendor/create', follow_redirects=True)
+        response = self.client.get('/inventory/vendor/create', follow_redirects=True)
         self.assertIn(b'Please log in to access this page', response.data)
 
     def test_vendor_registration(self):
@@ -113,7 +113,7 @@ class TestInventoryBlueprint(BaseTestCase):
     def test_edit_vendor_route_fails_with_invalid_vendor(self):
         with self.client:
             self.login()
-            response = self.client.get('/vendor/edit/1000',
+            response = self.client.get('/inventory/vendor/edit/1000',
                                        follow_redirects=True)
             self.assertEqual(response.status_code, 404)
 
@@ -124,14 +124,14 @@ class TestInventoryBlueprint(BaseTestCase):
     def test_view_all_vendors(self):
         with self.client:
             self.login()
-            response = self.client.get('/vendor/', follow_redirects=True)
+            response = self.client.get('/inventory/vendor/', follow_redirects=True)
             self.assertIn(b'<h1>Vendors</h1>\n', response.data)
 
     def test_view_vendor(self):
         with self.client:
             self.login()
             self.create_vendor()
-            response = self.client.get('/vendor/1', follow_redirects=True)
+            response = self.client.get('/inventory/vendor/1', follow_redirects=True)
             self.assertIn(b'Achme', response.data)
             self.assertIn(b'123 Coyote Ln', response.data)
             self.assertIn(b'Desert Plain', response.data)
@@ -163,7 +163,7 @@ class TestInventoryBlueprint(BaseTestCase):
 
     def test_view_route_requires_login(self):
         # Ensure member route requres logged in user.
-        response = self.client.get('/vendor/', follow_redirects=True)
+        response = self.client.get('/inventory/vendor/', follow_redirects=True)
         self.assertIn(b'Please log in to access this page', response.data)
 
     def test_edit_route_requires_login(self):

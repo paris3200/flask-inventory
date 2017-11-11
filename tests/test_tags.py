@@ -4,8 +4,8 @@
 import unittest
 
 from tests.base import BaseTestCase
-from project.models import LineItem, Component
-from project.inventory.forms import VendorCreateForm, PurchaseOrderForm, \
+from app.models import LineItem, Component
+from app.mod_inventory.forms import VendorCreateForm, PurchaseOrderForm, \
     ComponentCreateForm
 import json
 
