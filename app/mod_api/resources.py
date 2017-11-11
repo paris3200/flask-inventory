@@ -108,7 +108,11 @@ class PicturesAPI(Resource):
 	parse.add_argument('picture_file', type=FileStorage, location='files')
 	@marshal_with(picture)
 	def get(self, component_id=None):
-		pictures = Picture.query.all()
+		if component_id:
+			comp = Component.query.get(component_id)
+			pictures = comp.pictures.all()
+		else:
+			pictures = Picture.query.all()
 		# for t in tags:
 		# 	setattr(t,'__repr__',str(t))
 		return pictures
@@ -126,13 +130,33 @@ class PicturesAPI(Resource):
 					new_picture = Picture()
 					filename = secure_filename(picture.filename)
 					new_picture.filename = filename
-					db.session.add(new_picture)
+					comp.pictures.append(new_picture)
 					db.session.flush()
 					new_picture.filename = str(new_picture.id).zfill(5)+new_picture.filename
 					db.session.commit()
 					picture.save(os.path.join(current_app.config['PICTURES_FOLDER'], new_picture.filename))
 					return Picture.query.all()
 		return []
+
+	def delete(self, component_id, picture_id=None):
+		comp = Component.query.get(component_id)
+		if comp:
+			the_picture = filter(lambda x: x.id == picture_id, comp.pictures)[0]
+			print(the_picture)
+			print(comp.pictures)
+			comp.pictures.remove(the_picture)
+			db.session.commit()
+			return the_picture.id
+		return ([],404)
+
+	def put(self,component_id, picture_id):
+		comp = Component.query.get(component_id)
+		pic = Picture.query.get(picture_id)
+		if not comp or not pic:
+			return 404
+		comp.pictures.append(pic)
+		db.session.commit()
+		return ([], 200)
 
 api.add_resource(ComponentsAPI, '/components','/components/<int:component_id>')
 api.add_resource(ComponentTagsAPI, '/component-tags/<int:component_id>', '/component-tags/<int:component_id>/<int:tag_id>')
@@ -142,4 +166,7 @@ api.add_resource(CategoriesAPI, '/categories')
 api.add_resource(TagAPI, '/tag/<int:tag_id>')
 
 # pictures
-api.add_resource(PicturesAPI, '/pictures','/pictures/<int:component_id>')
+api.add_resource(PicturesAPI, '/pictures',
+	'/pictures/<int:component_id>',
+	'/pictures/delete/<int:component_id>/<int:picture_id>',
+	'/pictures/put/<int:component_id>/<int:picture_id>')
