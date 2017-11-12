@@ -1,4 +1,5 @@
 import os
+from PIL import Image
 from flask import Blueprint, current_app
 from flask_restful import Resource, Api, reqparse, marshal_with
 from flask_login import login_required
@@ -133,8 +134,25 @@ class PicturesAPI(Resource):
 					comp.pictures.append(new_picture)
 					db.session.flush()
 					new_picture.filename = str(new_picture.id).zfill(5)+new_picture.filename
-					db.session.commit()
 					picture.save(os.path.join(current_app.config['PICTURES_FOLDER'], new_picture.filename))
+					im = Image.open(os.path.join(current_app.config['PICTURES_FOLDER'], new_picture.filename))
+					# if image is square and greater than 900
+					if im.size[0] == im.size[1] and im.size[0] > 900:
+						im.reize(900,900)
+						im.save(os.path.join(current_app.config['PICTURES_FOLDER'], new_picture.filename))
+					# if height > 900
+					elif im.size[1] > 900:
+						# get percentage coefficient
+						coeff = float(900) / float(im.size[1])
+						x, y  = int(float(im.size[0]) * float(coeff)), int(float(im.size[1]) * float(coeff))
+						im = im.resize((x,y))
+						im.save(os.path.join(current_app.config['PICTURES_FOLDER'], new_picture.filename))
+					# Make thumbnail 
+					coeff = float(200) / float(im.size[1])
+					x, y  = int(float(im.size[0]) * float(coeff)), int(float(im.size[1]) * float(coeff))
+					im = im.resize((x,y))
+					im.save(os.path.join(current_app.config['PICTURES_FOLDER'], 'thumbnail_'+new_picture.filename))
+					db.session.commit()
 					return Picture.query.all()
 		return []
 
