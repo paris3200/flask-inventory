@@ -12,8 +12,8 @@ class TestMainBlueprint(BaseTestCase):
         # Ensure Flask is setup.
         response = self.client.get('/', follow_redirects=True)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Welcome To Flask-Inventory', response.data)
-        self.assertIn(b'Register/Login', response.data)
+        self.assertIn(b'ItemCheckOut.com', response.data)
+        self.assertIn(b'Login', response.data)
 
     def test_about(self):
         # Ensure about route behaves correctly.

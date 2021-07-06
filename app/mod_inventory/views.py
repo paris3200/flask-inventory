@@ -11,10 +11,10 @@ from flask.views import View
 
 from flask_login import login_required
 
-from project import db
-from project.models import Vendor, PurchaseOrder, LineItem, Component, Address,\
+from ..models import db, Vendor, PurchaseOrder, LineItem, Component, Address,\
     Transaction, TagCategory, Tag, VendorComponent, TagManager
-from project.inventory.forms import VendorCreateForm, PurchaseOrderForm, \
+
+from forms import VendorCreateForm, PurchaseOrderForm, \
     ComponentCreateForm, TransactionForm, TagForm
 
 ################
@@ -38,7 +38,7 @@ class TransactionMakerView(View):
         self.action_type = action_type
 
     def get_template_name(self):
-        return '/transaction/make.html'
+        return '/inventory/transaction/make.html'
 
     def render_template(self, context):
         return render_template(self.get_template_name(), ** context)
@@ -64,7 +64,7 @@ class TransactionMakerView(View):
                     flash("Not enough items, only %s available" %
                           (form.component.data.qty))
                     form.component.data = form.component.data.id
-                    return render_template("/transaction/make.html", form=form, the_action=self.action_type)
+                    return render_template("/inventory/transaction/make.html", form=form, the_action=self.action_type)
             elif request.form.get("checkin"):
                 form.populate_obj(nt)
                 nt.component_id = form.component.data.id
@@ -74,7 +74,7 @@ class TransactionMakerView(View):
                 flash('Success: %s Checked In' %
                       ("Items" if nt.qty > 1 else "Item"))
             return redirect(url_for('main.home'))
-        return render_template("/transaction/make.html",
+        return render_template("/inventory/transaction/make.html",
                                form=form, the_action=self.action_type)
 
 ################
@@ -109,7 +109,7 @@ def transactions():
         period_date = datetime.datetime.combine(period_date, datetime.datetime.min.time())
         query = query.filter(Transaction.date_create > period_date)
     transactions = query.paginate(page, per_page=20, error_out=True)
-    return render_template("/transaction/transactions.html",
+    return render_template("/inventory/transaction/transactions.html",
                            transactions=transactions, page=page, period=period, search=search)
 
 
@@ -126,20 +126,20 @@ inventory_blueprint.add_url_rule(
 ################
 
 
-@inventory_blueprint.route('/vendor/<int:vendor_id>', methods=['GET'])
-@inventory_blueprint.route('/vendor/', methods=['GET'])
+@inventory_blueprint.route('/inventory/vendor/<int:vendor_id>', methods=['GET'])
+@inventory_blueprint.route('/inventory/vendor/', methods=['GET'])
 @login_required
 def view_vendor(vendor_id=None):
     if vendor_id:
         vendor = Vendor.query.get_or_404(vendor_id)
         orders = PurchaseOrder.query.filter_by(vendor_id=vendor.id)
-        return render_template('vendor/view.html', vendor=vendor,
+        return render_template('inventory/vendor/view.html', vendor=vendor,
                                purchase_orders=orders)
     vendors = Vendor.query.all()
-    return render_template('/vendor/view_all.html', entries=vendors)
+    return render_template('inventory/vendor/view_all.html', entries=vendors)
 
 
-@inventory_blueprint.route('/vendor/create', methods=['GET', 'POST'])
+@inventory_blueprint.route('/inventory/vendor/create', methods=['GET', 'POST'])
 @login_required
 def create_vendor():
     form = VendorCreateForm()
@@ -166,7 +166,7 @@ def create_vendor():
             else:
                 flash('Vendor already exist.')
                 return redirect(url_for('.view_vendor'))
-    return render_template('vendor/create.html', form=form)
+    return render_template('inventory/vendor/create.html', form=form)
 
 
 @inventory_blueprint.route('/vendor/edit/<int:vendor_id>',
@@ -181,7 +181,7 @@ def edit_vendor(vendor_id):
 
         flash('Vendor Updated', 'success')
         return redirect(url_for('.view_vendor'))
-    return render_template('vendor/edit.html', form=form)
+    return render_template('inventory/vendor/edit.html', form=form)
 
 
 #########################
@@ -196,10 +196,10 @@ def edit_vendor(vendor_id):
 def view_purchase_order(po_id=None):
     if po_id:
         order = PurchaseOrder.query.get_or_404(po_id)
-        return render_template('/purchase_order/view.html',
+        return render_template('inventory/purchase_order/view.html',
                                result=order)
     purchase_orders = PurchaseOrder.query.all()
-    return render_template('/purchase_order/view_all.html',
+    return render_template('inventory/purchase_order/view_all.html',
                            result=purchase_orders)
 
 
@@ -227,13 +227,13 @@ def create_purchase_order(vendor_id):
                 order.line_item.append(line1)
             else:
                 flash('Component not found.')
-                return render_template('/purchase_order/create.html',
+                return render_template('inventory/purchase_order/create.html',
                                        form=form,
                                        vendor=vendor)
         db.session.commit()
         flash('Purchase Order Added', 'success')
         return redirect(url_for('.view_purchase_order', po_id=order.id))
-    return render_template('/purchase_order/create.html', form=form,
+    return render_template('inventory/purchase_order/create.html', form=form,
                            vendor=vendor)
 
 
@@ -258,7 +258,7 @@ def create_vendor_component(vendor_id):
             flash('Component already exists.')
             return redirect(url_for('.create_vendor_component',
                                     vendor_id=vendor_id))
-    return render_template('/vendor_component/create.html', form=form)
+    return render_template('inventory/vendor_component/create.html', form=form)
 
 
 @inventory_blueprint.route('/vendor/<int:vendor_id>/component/',
@@ -267,7 +267,7 @@ def create_vendor_component(vendor_id):
 def view_vendor_component(vendor_id, component_id=None):
     vendor = Vendor.query.get_or_404(vendor_id)
     component = VendorComponent.query.filter_by(vendor=vendor)
-    return render_template('/vendor_component/view_all.html', result=component)
+    return render_template('inventory/vendor_component/view_all.html', result=component)
 
 
 @inventory_blueprint.route('/component/create', methods=['GET', 'POST'])
@@ -283,7 +283,7 @@ def create_component():
             db.session.commit()
             flash('New Component Added', 'success')
             return redirect(url_for('.view_component'))
-    return render_template('/component/create.html', form=form)
+    return render_template('inventory/component/create.html', form=form)
 
 
 @inventory_blueprint.route('/component/<int:component_id>', methods=['GET'])
@@ -292,10 +292,10 @@ def create_component():
 def view_component(component_id=None):
     if component_id:
         component = Component.query.get_or_404(component_id)
-        return render_template('component/view.html', result=component)
+        return render_template('inventory/component/view.html', result=component)
     component = Component.query.all()
 
-    return render_template('/component/view_all.html', result=component)
+    return render_template('inventory/component/view_all.html', result=component)
 
 
 @inventory_blueprint.route('/manage-tags', methods=['GET', 'POST'])
@@ -310,7 +310,7 @@ def manage_tags():
             flash('Tag could not be created')
     categories = TagCategory.query.all()
     uncategorized_tags = Tag.query.filter(Tag.categories is None).all()
-    return render_template("/tags/tag-manager.html",
+    return render_template("inventory/tags/tag-manager.html",
                            categories=categories,
                            uncategorized_tags=uncategorized_tags,
                            form=form)
@@ -332,6 +332,6 @@ def tag_component(component_id=None):
                                 component_id=component_id))
     categories = TagCategory.query.all()
     tags = Tag.query.all()
-    return render_template("/component/tag-component.html",
+    return render_template("inventory/component/tag-component.html",
                            result=the_component, form=form,
                            categories=categories, tags=tags)

@@ -23,7 +23,7 @@ $ pip install -r requirements.txt
 Update *config.py*, and then run:
 
 ```sh
-$ export APP_SETTINGS="project.config.DevelopmentConfig"
+$ export APP_SETTINGS="config.DevConfig"
 ```
 
 ### Create DB

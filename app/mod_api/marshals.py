@@ -4,6 +4,11 @@ tag = {
 	'name' : fields.String,
 	'__repr__' : fields.String,
 }
+picture = {
+	'id' : fields.String,
+	'filename' : fields.String,
+	'__repr__' : fields.String,
+}
 
 item = {
 	'id': fields.String,
@@ -11,6 +16,7 @@ item = {
 	'qty' : fields.String,
 	'description' : fields.String,
 	'tags' : fields.Nested(tag),
+	'pictures' : fields.Nested(picture),
 }
 
 category = {

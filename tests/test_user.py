@@ -6,9 +6,9 @@ import unittest
 
 from flask_login import current_user
 from tests.base import BaseTestCase
-from project import bcrypt
-from project.models import User
-from project.user.forms import LoginForm
+from app import bcrypt
+from app.models import User
+from app.mod_user.forms import LoginForm
 
 
 class TestUserBlueprint(BaseTestCase):

@@ -77,6 +77,9 @@ $(document).ready(function() {
         });
         return found;
       },
+      getPicThumbnailUrl: function(filename) {
+        return '/static/pictures/'+filename;
+      },
     },
     computed: {
       filteredItems : function() {
@@ -109,11 +112,13 @@ $(document).ready(function() {
   </header>
   {% raw %}
   <div id="search-app">
-    <label for="sstr">Search:</label>&nbsp;
-    <input autocomplete="off" name="sstr" type="text" v-model="sstr">
+    <div class="form-group" style="vertical-align:top">
+      <label for="sstr">Search:</label>&nbsp;
+      <input autocomplete="off" name="sstr" type="text" v-model="sstr">
+    </div>
     <div style="display:inline-block">
       <ul class="list-unstyled list-inline" style="margin-left:20px">
-        <li v-for="cat in categories"><strong>{{cat.name}}</strong>
+        <li v-for="cat in categories" style="vertical-align:top;"><strong>{{cat.name}}</strong>
           <ul class="list-unstyled">
             <li v-for="t in cat.tags">
               <input type="checkbox" v-model="checkedCategoryTags" v-bind:value="t.name">
@@ -130,9 +135,12 @@ $(document).ready(function() {
     </ul>
     <table class="table">
       <tr v-for="item in filteredItems">
-        <td><a v-on:click="applyToCheckIn(item.id)" class="btn btn-primary">
+        <td style="width:1%"><a v-on:click="applyToCheckIn(item.id)" class="btn btn-primary">
           {{item.sku}}
         </a></td>
+        <td>
+          <img v-if="item.pictures.length > 0" :src="getPicThumbnailUrl(item.pictures[0].filename)" style="max-height: 50px">
+        </td>
         <td>{{item.description}}</td>
       </tr>
     </table>

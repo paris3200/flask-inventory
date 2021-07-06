@@ -7,6 +7,7 @@
 
 from flask import render_template, Blueprint, redirect, url_for
 from flask_login import login_required, current_user
+from ..mod_user.forms import LoginForm
 
 ################
 #### config ####
@@ -28,7 +29,8 @@ def index():
 def home():
 	if current_user.is_authenticated():
 		return redirect(url_for('main.index'))
-	return render_template('main/home.html')
+	form = LoginForm()
+	return render_template('main/home.html', form=form)
 
 
 @main_blueprint.route("/about/")

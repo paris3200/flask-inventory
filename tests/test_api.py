@@ -3,7 +3,7 @@
 
 import unittest
 
-from project.models import Component, Tag
+from app.models import Component, Tag
 from tests.base import BaseTestCase
 
 
