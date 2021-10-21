@@ -3,7 +3,7 @@ alembic==0.8.10
 aniso8601==1.2.0
 appdirs==1.4.0
 argh==0.26.2
-Babel==2.3.4
+Babel==2.9.1
 blinker==1.4
 coverage==4.3.4
 Flask==0.12
