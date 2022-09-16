@@ -21,7 +21,7 @@ imagesize==0.7.1
 itsdangerous==0.24
 Jinja2==2.9.5
 livereload==2.5.1
-Mako==1.0.6
+Mako==1.2.2
 MarkupSafe==0.23
 packaging==16.8
 pathtools==0.1.2
